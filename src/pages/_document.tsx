@@ -10,13 +10,14 @@ import Document, {
 import createEmotionServer from '@emotion/server/create-instance';
 import { AppType } from 'next/app';
 import createEmotionCache from '../utils/createEmotionCache';
-import {  } from './_app';
+import { MyAppProps } from './_app';
 
 interface MyDocumentProps extends DocumentProps {
   emotionStyleTags: JSX.Element[];
 }
 
 export default function MyDocument({ emotionStyleTags }: MyDocumentProps) {
+
   return (
     <Html lang="pt-br">
       <Head>

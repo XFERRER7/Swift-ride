@@ -84,7 +84,7 @@ export default function Home() {
                   justifyContent: 'center'
                 }}>
                   <Button variant="contained" fullWidth onClick={() => {
-                    handleChoice('/admin/dashboard')
+                    handleChoice('/admin/dashboard/vehicles')
                   }}>Entrar</Button>
                 </CardActions>
               </Card>

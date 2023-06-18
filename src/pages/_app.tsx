@@ -22,6 +22,10 @@ export default function MyApp(props: MyAppProps) {
       primary: {
         main: '#16141c',
       },
+      secondary: {
+        main: '#6b7280',
+        contrastText: '#fff',
+      }
     },
     components: {
       MuiButton: {
@@ -35,7 +39,9 @@ export default function MyApp(props: MyAppProps) {
       }
     }
   })
-  
+
+
+
   return (
     <CacheProvider value={emotionCache}>
       <Head>
@@ -44,7 +50,7 @@ export default function MyApp(props: MyAppProps) {
       <ThemeProvider theme={theme}>
         {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
         <CssBaseline />
-        <Component {...pageProps} />
+        <Component {...pageProps}/>
       </ThemeProvider>
     </CacheProvider>
   )
