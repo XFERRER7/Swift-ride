@@ -12,17 +12,22 @@ import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import Link from '@mui/material/Link';
-import { createTheme, ThemeProvider } from '@mui/material/styles'
+import adminImg from '../assets/admin.svg'
+import clientImg from '../assets/client.svg'
+import { useRouter } from 'next/router';
 
 export default function Home() {
 
-  const cards = [1, 2, 3]
+  const { push } = useRouter()
+
+  function handleChoice(choice: string) {
+    push(choice)
+  }
 
   return (
     <main>
       <CssBaseline />
-      <AppBar position="relative" color='secondary'>
+      <AppBar position="relative" color='primary'>
         <Toolbar>
           <Typography variant="h6" color="inherit" noWrap>
             Swift Rider
@@ -51,37 +56,71 @@ export default function Home() {
           </Container>
         </Box>
         <Container sx={{ py: 2 }} maxWidth="md">
-          {/* End hero unit */}
-          <Grid container spacing={4}>
-            {cards.map((card) => (
-              <Grid item key={card} xs={12} sm={6} md={4}>
-                <Card
-                  sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-                >
-                  <CardMedia
-                    component="div"
-                    sx={{
-                      // 16:9
-                      pt: '56.25%',
-                    }}
-                    image="https://source.unsplash.com/random?wallpapers"
-                  />
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Typography gutterBottom variant="h5" component="h2">
-                      Heading
-                    </Typography>
-                    <Typography>
-                      This is a media card. You can use this section to describe the
-                      content.
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button size="small">View</Button>
-                    <Button size="small">Edit</Button>
-                  </CardActions>
-                </Card>
-              </Grid>
-            ))}
+
+          <Grid container spacing={4} justifyContent='center'>
+
+            <Grid item key={1} xs={12} sm={6} md={4} justifyContent={'center'} alignItems='center'>
+              <Card
+                sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+              >
+                <CardMedia
+                  component="div"
+                  sx={{
+                    pt: '56.25%',
+                    objectFit: 'cover'
+                  }}
+                  image={adminImg.src}
+                />
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography gutterBottom variant="h5" component="h2">
+                    Administrador
+                  </Typography>
+                  <Typography color='GrayText'>
+                    Permissão para gerenciar veículos, motoristas e deslocamentos
+                  </Typography>
+                </CardContent>
+                <CardActions sx={{
+                  display: 'flex',
+                  justifyContent: 'center'
+                }}>
+                  <Button variant="contained" fullWidth onClick={() => {
+                    handleChoice('/admin/dashboard')
+                  }}>Entrar</Button>
+                </CardActions>
+              </Card>
+            </Grid>
+
+            <Grid item key={1} xs={12} sm={6} md={4} justifyContent={'center'} alignItems='center'>
+              <Card
+                sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+              >
+                <CardMedia
+                  component="div"
+                  sx={{
+                    // 16:9
+                    pt: '56.25%',
+                  }}
+                  image={clientImg.src}
+                />
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography gutterBottom variant="h5" component="h2">
+                    Cliente
+                  </Typography>
+                  <Typography color='GrayText'>
+                    Permissão para solicitar deslocamentos
+                  </Typography>
+                </CardContent>
+                <CardActions sx={{
+                  display: 'flex',
+                  justifyContent: 'center'
+                }}>
+                  <Button variant="contained" fullWidth onClick={() => {
+                    handleChoice('/client/home')
+                  }}>Entrar</Button>
+                </CardActions>
+              </Card>
+            </Grid>
+
           </Grid>
         </Container>
       </main>
