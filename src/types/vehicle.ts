@@ -1,7 +1,7 @@
 export interface IVehicle {
   id: number
   licensePlate: string
-  makeModel: string
-  manufacturingYear: number
+  brandModel: string
+  manufacturingYear: string
   currentKm: number
 }

@@ -11,6 +11,7 @@ import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableContainer from "@mui/material/TableContainer"
 import TableHead from "@mui/material/TableHead"
 import TableRow from "@mui/material/TableRow"
+import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
 
 import { Container, useTheme } from "@mui/material"
@@ -19,8 +20,10 @@ import { CreateVehicleForm } from "@/components/admin/forms/CreateVehicleForm"
 import { GetServerSideProps } from "next"
 import { api } from "@/lib/api"
 import { IVehicle } from "@/types/vehicle"
+import { Suspense } from "react"
 
-interface IVehicleProps {
+
+interface IVehiclesProps {
   data: IVehicle[]
 }
 
@@ -34,9 +37,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
   },
 }));
 
-export default function vehicles({ data }: IVehicleProps) {
-
-  const theme = useTheme();
+export default function vehicles({ data }: IVehiclesProps) {
 
   const [activeTab, setActiveTab] = useState(1);
 
@@ -46,70 +47,87 @@ export default function vehicles({ data }: IVehicleProps) {
   ) => {
     setActiveTab(newValue);
   };
-
+  
   return (
     <AdminLayout>
 
       <Container>
         <Tabs value={activeTab} onChange={handleTabChange} variant="fullWidth">
-          <Tab label="Cadastro" title="Adicionar novo veículo ao sistema" />
           <Tab label="Dados cadastrados" title="Lista de veículos cadastrados no sistema" />
+          <Tab label="Cadastro" title="Adicionar novo veículo ao sistema" />
         </Tabs>
       </Container>
       <Container>
         {activeTab === 0 && (
-          <Box p={3}>
-
-            <CreateVehicleForm />
-
-          </Box>
-        )}
-        {activeTab === 1 && (
           <Box p={3} sx={{
             overflow: "hidden",
           }}>
 
-            <TableContainer component={Paper}>
-              <Table aria-label="simple table">
-                <TableHead>
-                  <TableRow>
-                    <StyledTableCell>Marca - Modelo</StyledTableCell>
-                    <StyledTableCell align="right">Placa</StyledTableCell>
-                    <StyledTableCell align="right">Ano de fabricação</StyledTableCell>
-                    <StyledTableCell align="right">Km atual</StyledTableCell>
-                    <StyledTableCell align="right">Editar</StyledTableCell>
-                    <StyledTableCell align="right">Excluir</StyledTableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {
-                    data.map((vehicle: IVehicle) => (
-                      <TableRow
-                        key={vehicle.id}
-                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                      >
-                        <TableCell component="th" scope="row">
-                          {vehicle.makeModel}
-                        </TableCell>
-                        <TableCell align="right">{vehicle.licensePlate}</TableCell>
-                        <TableCell align="right">{vehicle.manufacturingYear}</TableCell>
-                        <TableCell align="right">{vehicle.currentKm}</TableCell>
-                        <TableCell align="right" sx={{
+            <Suspense fallback={<div>Carregando...</div>}>
+              <TableContainer component={Paper}>
+                <Table aria-label="simple table">
+                  <TableHead>
+                    <TableRow>
+                      <StyledTableCell>Marca - Modelo</StyledTableCell>
+                      <StyledTableCell align="right">Placa</StyledTableCell>
+                      <StyledTableCell align="right">Ano de fabricação</StyledTableCell>
+                      <StyledTableCell align="right">Km atual</StyledTableCell>
+                      <StyledTableCell align="right">Editar</StyledTableCell>
+                      <StyledTableCell align="right">Excluir</StyledTableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {
+                      data.map((vehicle: IVehicle) => (
+                        <TableRow
+                          key={vehicle.id}
+                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                        >
+                          <TableCell component="th" scope="row">
+                            {
+                              vehicle.brandModel != '' ? vehicle.brandModel : <Typography color="GrayText" >Não informado</Typography>
+                            }
+                          </TableCell>
+                          <TableCell align="right">
+                            {
+                              vehicle.licensePlate != '' ? vehicle.licensePlate : <Typography color="GrayText" >Não informado</Typography>
+                            }
+                          </TableCell>
+                          <TableCell align="right">
+                            {
+                              vehicle.manufacturingYear != '' ? vehicle.manufacturingYear : <Typography color="GrayText" >Não informado</Typography>
+                            }
+                          </TableCell>
+                          <TableCell align="right">
+                            {
+                              vehicle.currentKm != 0 ? vehicle.currentKm : <Typography color="GrayText" >Não informado</Typography>
+                            }
+                          </TableCell>
+                          <TableCell align="right" sx={{
                             cursor: "pointer"
                           }}>
-                          <ModeEdit color='warning'/>
-                        </TableCell>
-                        <TableCell align="right" sx={{
+                            <ModeEdit color='warning' />
+                          </TableCell>
+                          <TableCell align="right" sx={{
                             cursor: "pointer"
                           }}>
-                          <Delete color="error" />
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  }
-                </TableBody>
-              </Table>
-            </TableContainer>
+                            <Delete color="error" />
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    }
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Suspense>
+
+          </Box>
+        )}
+        {activeTab === 1 && (
+          <Box p={3}>
+
+            <CreateVehicleForm />
+
           </Box>
         )}
       </Container>
@@ -127,16 +145,16 @@ export const getServerSideProps: GetServerSideProps = async () => {
   const vehicles: IVehicle[] = []
 
   data.map((vehicle: any) => {
-    
-    const vehicleData: IVehicle = {
+
+    const newVehicle: IVehicle = {
       id: vehicle.id,
-      licensePlate: vehicle.placa,
-      makeModel: vehicle.marcaModelo,
-      manufacturingYear: vehicle.anoFabricacao,
+      licensePlate: vehicle.placa || '',
+      brandModel: vehicle.marcaModelo || '',
+      manufacturingYear: vehicle.anoFabricacao != 0 ? vehicle.anoFabricacao : '',
       currentKm: vehicle.kmAtual,
     }
 
-    vehicles.push(vehicleData)
+    vehicles.push(newVehicle)
   })
 
   return {

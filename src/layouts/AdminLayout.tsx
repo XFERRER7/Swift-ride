@@ -264,7 +264,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
           sx={{
             width: '100%',
             marginTop: '4rem',
-
+            maxWidth: '95%'
           }}
         >
           {children}
