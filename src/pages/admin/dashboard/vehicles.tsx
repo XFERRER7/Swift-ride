@@ -1,166 +1,164 @@
 import { AdminLayout } from "@/layouts/AdminLayout"
-import Delete from "@mui/icons-material/Delete"
-import ModeEdit from "@mui/icons-material/ModeEdit"
 import Box from "@mui/material/Box"
-import Paper from "@mui/material/Paper"
-import Tabs from "@mui/material/Tabs"
-import Tab from "@mui/material/Tab"
-import Table from "@mui/material/Table"
-import TableBody from "@mui/material/TableBody"
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import TableContainer from "@mui/material/TableContainer"
-import TableHead from "@mui/material/TableHead"
-import TableRow from "@mui/material/TableRow"
 import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';
-
-import { Container, useTheme } from "@mui/material"
-import { useState } from "react"
-import { CreateVehicleForm } from "@/components/admin/forms/CreateVehicleForm"
-import { GetServerSideProps } from "next"
+import Button from "@mui/material/Button"
+import Card from "@mui/material/Card"
+import CardContent from "@mui/material/CardContent"
+import AddCircleOutline from "@mui/icons-material/AddCircleOutline"
+import CardActions from "@mui/material/CardActions"
+import Grid from "@mui/material/Grid"
+import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import { IVehicle } from "@/types/vehicle"
-import { Suspense } from "react"
+import { DashboardSkeleton } from "@/components/admin/DashboardSkeleton";
 
 
-interface IVehiclesProps {
-  data: IVehicle[]
-}
+export default function vehicles() {
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-  },
-  [`&.${tableCellClasses.body}`]: {
-    fontSize: 14,
-  },
-}));
+  const [vehicles, setVehicles] = useState<IVehicle[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-export default function vehicles({ data }: IVehiclesProps) {
 
-  const [activeTab, setActiveTab] = useState(1);
+  async function getDataVehicles() {
 
-  const handleTabChange = (
-    event: React.SyntheticEvent,
-    newValue: number
-  ) => {
-    setActiveTab(newValue);
-  };
-  
+    const response = await api.get("/Veiculo")
+
+    const data = response.data
+
+    const vehicles: IVehicle[] = []
+
+    data.map((vehicle: any) => {
+
+      const newVehicle: IVehicle = {
+        id: vehicle.id,
+        licensePlate: vehicle.placa || '',
+        brandModel: vehicle.marcaModelo || '',
+        manufacturingYear: vehicle.anoFabricacao != 0 ? vehicle.anoFabricacao : '',
+        currentKm: vehicle.kmAtual,
+      }
+
+      vehicles.push(newVehicle)
+    })
+
+    setVehicles(vehicles)
+    setIsLoading(false)
+
+  }
+
+  useEffect(() => {
+    getDataVehicles()
+  }, [])
+
   return (
     <AdminLayout>
 
-      <Container>
-        <Tabs value={activeTab} onChange={handleTabChange} variant="fullWidth">
-          <Tab label="Dados cadastrados" title="Lista de veículos cadastrados no sistema" />
-          <Tab label="Cadastro" title="Adicionar novo veículo ao sistema" />
-        </Tabs>
-      </Container>
-      <Container>
-        {activeTab === 0 && (
-          <Box p={3} sx={{
-            overflow: "hidden",
-          }}>
+      <Box display='flex' flexDirection='column' sx={{
+        paddingLeft: 5,
+        paddingRight: 5,
+      }}>
 
-            <Suspense fallback={<div>Carregando...</div>}>
-              <TableContainer component={Paper}>
-                <Table aria-label="simple table">
-                  <TableHead>
-                    <TableRow>
-                      <StyledTableCell>Marca - Modelo</StyledTableCell>
-                      <StyledTableCell align="right">Placa</StyledTableCell>
-                      <StyledTableCell align="right">Ano de fabricação</StyledTableCell>
-                      <StyledTableCell align="right">Km atual</StyledTableCell>
-                      <StyledTableCell align="right">Editar</StyledTableCell>
-                      <StyledTableCell align="right">Excluir</StyledTableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {
-                      data.map((vehicle: IVehicle) => (
-                        <TableRow
-                          key={vehicle.id}
-                          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                        >
-                          <TableCell component="th" scope="row">
-                            {
-                              vehicle.brandModel != '' ? vehicle.brandModel : <Typography color="GrayText" >Não informado</Typography>
-                            }
-                          </TableCell>
-                          <TableCell align="right">
-                            {
-                              vehicle.licensePlate != '' ? vehicle.licensePlate : <Typography color="GrayText" >Não informado</Typography>
-                            }
-                          </TableCell>
-                          <TableCell align="right">
-                            {
-                              vehicle.manufacturingYear != '' ? vehicle.manufacturingYear : <Typography color="GrayText" >Não informado</Typography>
-                            }
-                          </TableCell>
-                          <TableCell align="right">
-                            {
-                              vehicle.currentKm != 0 ? vehicle.currentKm : <Typography color="GrayText" >Não informado</Typography>
-                            }
-                          </TableCell>
-                          <TableCell align="right" sx={{
-                            cursor: "pointer"
-                          }}>
-                            <ModeEdit color='warning' />
-                          </TableCell>
-                          <TableCell align="right" sx={{
-                            cursor: "pointer"
-                          }}>
-                            <Delete color="error" />
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    }
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Suspense>
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 2,
+          flexDirection: {
+            xs: 'column',
+            sm: 'row',
+          }
+        }}>
+          <Typography
+            variant="h5"
+            noWrap
+            component="a"
+            sx={{
+              mr: 2,
+              fontFamily: 'monospace',
+              fontWeight: 700,
+              color: 'inherit',
+              textDecoration: 'none',
+            }}
+          >
+            Veículos cadastrados
+          </Typography>
 
-          </Box>
-        )}
-        {activeTab === 1 && (
-          <Box p={3}>
 
-            <CreateVehicleForm />
+          <Button variant='contained' color='primary' startIcon={<AddCircleOutline />}>
+            Adicionar veículo
+          </Button>
 
-          </Box>
-        )}
-      </Container>
+        </Box>
 
-    </AdminLayout>
+        <Box sx={{}} mt={3}>
+
+
+          <Grid container spacing={2}>
+            {
+
+              isLoading ? (
+                <>
+                  <Grid item xs={12} sm={6}>
+                    <DashboardSkeleton />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <DashboardSkeleton />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <DashboardSkeleton />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <DashboardSkeleton />
+                  </Grid>
+                </>
+              )
+                :
+                vehicles.map((vehicle: IVehicle) => (
+                  <Grid item xs={12} sm={6} key={vehicle.id}>
+                    <Card variant='outlined' sx={{ marginBottom: 2, backgroundColor: '#f5f5f5' }}>
+                      <CardContent>
+                        <Typography variant='h6' sx={{ fontWeight: 'bold' }}>
+                          {vehicle.brandModel}
+                        </Typography>
+                        <Box sx={{ display: 'flex', marginBottom: 1, marginTop: 1 }}>
+                          <Typography variant='body2' sx={{ fontWeight: 'bold', marginRight: 1 }}>
+                            Placa:
+                          </Typography>
+                          <Typography variant='body2'>{vehicle.licensePlate}</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', marginBottom: 1 }}>
+                          <Typography variant='body2' sx={{ fontWeight: 'bold', marginRight: 1 }}>
+                            Ano de fabricação:
+                          </Typography>
+                          <Typography variant='body2'>{vehicle.manufacturingYear}</Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex' }}>
+                          <Typography variant='body2' sx={{ fontWeight: 'bold' }}>
+                            Km atual:
+                          </Typography>
+                          <Typography variant='body2'>{vehicle.currentKm}</Typography>
+                        </Box>
+                      </CardContent>
+                      <CardActions>
+                        <Button variant='contained' color='error' sx={{
+                          width: '80px',
+                        }}>
+                          Excluir
+                        </Button>
+                        <Button variant='contained' color='primary' sx={{ marginRight: 1 }}>
+                          Editar
+                        </Button>
+                      </CardActions>
+                    </Card>
+                  </Grid>
+                ))
+
+            }
+          </Grid>
+
+        </Box>
+
+      </Box>
+
+    </AdminLayout >
   )
-}
-
-export const getServerSideProps: GetServerSideProps = async () => {
-
-  const response = await api.get("/Veiculo")
-
-  const data = response.data
-
-  const vehicles: IVehicle[] = []
-
-  data.map((vehicle: any) => {
-
-    const newVehicle: IVehicle = {
-      id: vehicle.id,
-      licensePlate: vehicle.placa || '',
-      brandModel: vehicle.marcaModelo || '',
-      manufacturingYear: vehicle.anoFabricacao != 0 ? vehicle.anoFabricacao : '',
-      currentKm: vehicle.kmAtual,
-    }
-
-    vehicles.push(newVehicle)
-  })
-
-  return {
-    props: {
-      data: vehicles
-    }
-  }
-
 }

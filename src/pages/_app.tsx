@@ -36,6 +36,14 @@ export default function MyApp(props: MyAppProps) {
             },
           }
         }
+      },
+      MuiTypography: {
+        styleOverrides: {
+          root: {
+              fontFamily: 'monospace',
+              textDecoration: 'none',
+          }
+        }
       }
     }
   })

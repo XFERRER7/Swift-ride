@@ -116,8 +116,8 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
         }}>
           <Typography variant="h6" sx={{
             fontSize: {
-              xs: '1.0rem',
-              md: '1.2rem',
+              xs: '0.8rem',
+              md: '1.1rem',
             }
           }}>
             Swift Ride | Admin
@@ -209,7 +209,13 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
 
               {
                 !isMobile && (
-                  <Typography variant="h5" component="h6" >
+                  <Typography variant="h5" component="h6"  sx={{
+                    mr: 2,
+                    fontFamily: 'monospace',
+                    fontWeight: 700,
+                    color: 'inherit',
+                    textDecoration: 'none',
+                  }}>
                     Painel de Controle
                   </Typography>
                 )

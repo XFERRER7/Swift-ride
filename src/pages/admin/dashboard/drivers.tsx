@@ -1,154 +1,198 @@
 import { AdminLayout } from "@/layouts/AdminLayout"
 import Box from "@mui/material/Box"
-import Paper from "@mui/material/Paper"
-import Tabs from "@mui/material/Tabs"
-import Tab from "@mui/material/Tab"
-import Table from "@mui/material/Table"
-import TableBody from "@mui/material/TableBody"
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import TableContainer from "@mui/material/TableContainer"
-import TableHead from "@mui/material/TableHead"
-import TableRow from "@mui/material/TableRow"
-import ModeEdit from '@mui/icons-material/ModeEdit';
-import Delete from '@mui/icons-material/Delete';
 import Typography from '@mui/material/Typography';
-import Container from "@mui/material/Container"
-import { useTheme } from "@mui/material"
-import { useState } from "react"
-import { CreateDriverForm } from "@/components/admin/forms/CreateDriverForm"
-import { styled } from '@mui/material/styles';
-import { GetServerSideProps } from "next"
+import Button from "@mui/material/Button"
+import Card from "@mui/material/Card"
+import CardContent from "@mui/material/CardContent"
+import AddCircleOutline from "@mui/icons-material/AddCircleOutline"
+import CardActions from "@mui/material/CardActions"
+import Grid from "@mui/material/Grid"
+import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
-import { IDriver } from "@/types/driver"
+import { DashboardSkeleton } from "@/components/admin/DashboardSkeleton";
+import { IDriver } from "@/types/driver";
 
+export default function drivers() {
 
-interface IDriversProps {
-  data: IDriver[]
-}
+  const [drivers, setDrivers] = useState<IDriver[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-  },
-  [`&.${tableCellClasses.body}`]: {
-    fontSize: 14,
-  },
-}));
+  async function getDataDrivers() {
 
+    const response = await api.get('/Condutor')
 
-export default function drivers({ data }: IDriversProps) {
+    const data = response.data
 
-  const [activeTab, setActiveTab] = useState(1);
+    const drivers: IDriver[] = []
 
-  const handleTabChange = (
-    event: React.SyntheticEvent,
-    newValue: number
-  ) => {
-    setActiveTab(newValue);
-  };
+    data.map((driver: any) => {
+
+      const newDriver: IDriver = {
+        id: driver.id,
+        name: driver.nome || '',
+        driverLicenseNumber: driver.numeroHabilitacao || '',
+        driverLicenseCategory: driver.catergoriaHabilitacao || '',
+        driverLicenseExpiration: driver.vencimentoHabilitacao || '',
+      }
+
+      drivers.push(newDriver)
+
+    })
+
+    setDrivers(drivers)
+    setIsLoading(false)
+
+  }
+
+  useEffect(() => {
+    getDataDrivers()
+  }, [])
 
   return (
     <AdminLayout>
 
-      <Container>
-        <Tabs value={activeTab} onChange={handleTabChange} variant="fullWidth">
-          <Tab label="Dados cadastrados" title="Lista de motoristas cadastrados no sistema" />
-          <Tab label="Cadastro" title="Adicionar novo motorista ao sistema" />
-        </Tabs>
-      </Container>
-      <Container>
-        {activeTab === 0 && (
-          <Box p={3}>
+      <Box display='flex' flexDirection='column' sx={{
+        paddingLeft: 5,
+        paddingRight: 5,
+      }}>
 
-            <TableContainer component={Paper}>
-              <Table aria-label="simple table">
-                <TableHead>
-                  <TableRow>
-                    <StyledTableCell>Nome</StyledTableCell>
-                    <StyledTableCell align="right">Categoria da CNH</StyledTableCell>
-                    <StyledTableCell align="right">Nº de registro</StyledTableCell>
-                    <StyledTableCell align="right">Venciemento da CNH</StyledTableCell>
-                    <StyledTableCell align="right">Editar</StyledTableCell>
-                    <StyledTableCell align="right">Excluir</StyledTableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {
-                    data.map((driver: IDriver) => (
-                      <TableRow
-                        key={driver.id}
-                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                      >
-                        <TableCell component="th" scope="row">
-                          {driver.name != '' ? driver.name : <Typography color="GrayText" >Não informado</Typography>}
-                        </TableCell>
-                        <TableCell align="right">{
-                          driver.driverLicenseCategory != '' ? driver.driverLicenseCategory : <Typography color="GrayText" >Não informado</Typography>
-                        }</TableCell>
-                        <TableCell align="right">{
-                          driver.driverLicenseNumber != '' ? driver.driverLicenseNumber : <Typography color="GrayText" >Não informado</Typography>
-                        }</TableCell>
-                        <TableCell align="right">{
-                          driver.driverLicenseExpiration != '' ? driver.driverLicenseExpiration : <Typography color="GrayText" >Não informado</Typography>
-                        }</TableCell>
-                        <TableCell align="right" sx={{
-                          cursor: "pointer"
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 2,
+          flexDirection: {
+            xs: 'column',
+            sm: 'row',
+          }
+        }}>
+          <Typography
+            variant="h5"
+            noWrap
+            component="a"
+            sx={{
+              mr: 2,
+              fontFamily: 'monospace',
+              fontWeight: 700,
+              color: 'inherit',
+              textDecoration: 'none',
+            }}
+          >
+            Motoristas cadastrados
+          </Typography>
+
+
+          <Button variant='contained' color='primary' startIcon={<AddCircleOutline />}>
+            Adicionar motorista
+          </Button>
+
+        </Box>
+
+        <Box sx={{}} mt={3}>
+
+
+          <Grid container spacing={2}>
+            {
+
+              isLoading ? (
+                <>
+                  <Grid item xs={12} sm={6}>
+                    <DashboardSkeleton />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <DashboardSkeleton />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <DashboardSkeleton />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <DashboardSkeleton />
+                  </Grid>
+                </>
+              )
+                :
+
+
+                drivers.map((driver: IDriver) => (
+
+                  <Grid item xs={12} sm={6} key={driver.id}>
+                    <Card variant='outlined' sx={{ marginBottom: 2, backgroundColor: '#f5f5f5' }}>
+                      <CardContent>
+                        {
+                          driver.name != '' ?
+                            <Typography variant='h6' sx={{ fontWeight: 'bold' }}>
+                              {driver.name}
+                            </Typography>
+                            : <Typography color="GrayText" >
+                              Não informado
+                            </Typography>
+                        }
+
+                        <Box sx={{ display: 'flex',alignItems: 'center' , marginBottom: 1, marginTop: 1 }}>
+                          <Typography variant='body2' sx={{ fontWeight: 'bold', marginRight: 1 }}>
+                            Categoria da CNH:
+                          </Typography>
+
+                          {
+                            driver.driverLicenseCategory != '' ?
+                              <Typography variant='body2'>
+                                {driver.driverLicenseCategory}
+                              </Typography>
+                              : <Typography color="GrayText" >Não informado</Typography>
+                          }
+                        </Box>
+                        <Box sx={{ display: 'flex', marginBottom: 1 }}>
+                          <Typography variant='body2' sx={{ fontWeight: 'bold', marginRight: 1 }}>
+                            Nº de registro:
+                          </Typography>
+
+                          {
+                            driver.driverLicenseNumber != '' ?
+                              <Typography variant='body2'>
+                                {driver.driverLicenseNumber}
+                              </Typography>
+                              : <Typography color="GrayText" >Não informado</Typography>
+                          }
+                        </Box>
+                        <Box sx={{ display: 'flex' }}>
+                          <Typography variant='body2' sx={{ fontWeight: 'bold' }}>
+                            Vencimento da CNH:
+                          </Typography>
+
+                          {
+                            driver.driverLicenseExpiration != '' ?
+                              <Typography variant='body2'>
+                                {driver.driverLicenseExpiration}
+                              </Typography>
+                              : <Typography color="GrayText" >Não informado</Typography>
+                          }
+                        </Box>
+                      </CardContent>
+                      <CardActions>
+                        <Button variant='contained' color='error' sx={{
+                          width: '80px',
                         }}>
-                          <ModeEdit color='warning' />
-                        </TableCell>
-                        <TableCell align="right" sx={{
-                          cursor: "pointer"
-                        }}>
-                          <Delete color="error" />
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  }
-                </TableBody>
-              </Table>
-            </TableContainer>
+                          Excluir
+                        </Button>
+                        <Button variant='contained' color='primary' sx={{ marginRight: 1 }}>
+                          Editar
+                        </Button>
+                      </CardActions>
+                    </Card>
+                  </Grid>
 
-          </Box>
-        )}
-        {activeTab === 1 && (
 
-          <Box p={3}>
-            <CreateDriverForm />
-          </Box>
+                ))
 
-        )}
-      </Container>
+
+            }
+          </Grid>
+
+        </Box>
+
+      </Box>
 
     </AdminLayout>
   )
 }
 
-export const getServerSideProps: GetServerSideProps = async () => {
-
-  const response = await api.get('/Condutor')
-
-  const data = response.data
-
-  const drivers: IDriver[] = []
-
-  data.map((driver: any) => {
-
-    const newDriver: IDriver = {
-      id: driver.id,
-      name: driver.nome || '',
-      driverLicenseNumber: driver.numeroHabilitacao || '',
-      driverLicenseCategory: driver.categoriaHabilitacao || '',
-      driverLicenseExpiration: driver.vencimentoHabilitacao || '',
-    }
-
-    drivers.push(newDriver)
-
-  })
-
-  return {
-    props: {
-      data: drivers
-    }
-  }
-}
