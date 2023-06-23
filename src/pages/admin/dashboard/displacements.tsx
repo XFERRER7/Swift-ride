@@ -4,7 +4,6 @@ import Typography from '@mui/material/Typography';
 import Button from "@mui/material/Button"
 import Card from "@mui/material/Card"
 import CardContent from "@mui/material/CardContent"
-import AddCircleOutline from "@mui/icons-material/AddCircleOutline"
 import CardActions from "@mui/material/CardActions"
 import Grid from "@mui/material/Grid"
 import { useEffect, useState } from "react"
@@ -312,9 +311,6 @@ export default function displacements({ data }: IDisplacementsProps) {
                         <CardActions>
                           <Button variant='contained' color='error' sx={{ width: '80px' }}>
                             Excluir
-                          </Button>
-                          <Button variant='contained' color='primary' sx={{ marginRight: 1 }}>
-                            Editar
                           </Button>
                         </CardActions>
                       </Card>

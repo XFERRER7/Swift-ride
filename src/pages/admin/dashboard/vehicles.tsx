@@ -11,20 +11,24 @@ import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import { IVehicle } from "@/types/vehicle"
 import { DashboardSkeleton } from "@/components/admin/DashboardSkeleton";
-import { CreateVehicleModal } from "@/components/admin/forms/CreateVehicleModal";
+import { CreateVehicleModal } from "@/components/admin/modal/CreateVehicleModal";
 import Snackbar from '@mui/material/Snackbar'
 import SnackbarContent from '@mui/material/SnackbarContent'
+import { DeleteItemModal } from "@/components/admin/modal/DeleteItemModal";
 
 export default function vehicles() {
 
   const [vehicles, setVehicles] = useState<IVehicle[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [toastIsOpen, setToastIsOpen] = useState(false)
   const [createVehicleModalInfo, setCreateVehicleModalInfo] = useState({
     open: false,
     result: '' as 'success' | 'error' | ''
   })
-
+  const [deleteItemModalInfo, setDeleteItemModalInfo] = useState({
+    open: false,
+    result: '' as 'success' | 'error' | '',
+  })
+  const [idToDelete, setIdToDelete] = useState(null as null | number)
 
   async function getDataVehicles() {
 
@@ -54,11 +58,11 @@ export default function vehicles() {
 
   useEffect(() => {
     
-    if (createVehicleModalInfo.result === "success") {
+    if (createVehicleModalInfo.result === "success" || deleteItemModalInfo.result === "success") {
       getDataVehicles()
     }
 
-  }, [createVehicleModalInfo.result])
+  }, [createVehicleModalInfo.result, deleteItemModalInfo.result])
 
   useEffect(() => {
     getDataVehicles()
@@ -159,7 +163,15 @@ export default function vehicles() {
                       <CardActions>
                         <Button variant='contained' color='error' sx={{
                           width: '80px',
-                        }}>
+                        }}
+                        onClick={() => {
+                          setIdToDelete(vehicle.id)
+                          setDeleteItemModalInfo({
+                            open: true,
+                            result: ''
+                          })
+                        }}
+                        >
                           Excluir
                         </Button>
                         <Button variant='contained' color='primary' sx={{ marginRight: 1 }}>
@@ -204,6 +216,12 @@ export default function vehicles() {
         />
       </Snackbar>
       <CreateVehicleModal open={createVehicleModalInfo.open} setCreateVehicleModalInfo={setCreateVehicleModalInfo} />
+      <DeleteItemModal
+        open={deleteItemModalInfo.open}
+        id={idToDelete}
+        type="vehicle"
+        setDeleteItemModalInfo={setDeleteItemModalInfo}
+      />
     </AdminLayout >
   )
 }
