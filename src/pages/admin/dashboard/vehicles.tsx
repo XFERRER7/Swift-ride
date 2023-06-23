@@ -11,12 +11,19 @@ import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
 import { IVehicle } from "@/types/vehicle"
 import { DashboardSkeleton } from "@/components/admin/DashboardSkeleton";
-
+import { CreateVehicleModal } from "@/components/admin/forms/CreateVehicleModal";
+import Snackbar from '@mui/material/Snackbar'
+import SnackbarContent from '@mui/material/SnackbarContent'
 
 export default function vehicles() {
 
   const [vehicles, setVehicles] = useState<IVehicle[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [toastIsOpen, setToastIsOpen] = useState(false)
+  const [createVehicleModalInfo, setCreateVehicleModalInfo] = useState({
+    open: false,
+    result: '' as 'success' | 'error' | ''
+  })
 
 
   async function getDataVehicles() {
@@ -46,8 +53,16 @@ export default function vehicles() {
   }
 
   useEffect(() => {
+    
+    if (createVehicleModalInfo.result === "success") {
+      getDataVehicles()
+    }
+
+  }, [createVehicleModalInfo.result])
+
+  useEffect(() => {
     getDataVehicles()
-  }, [])
+  }, []);
 
   return (
     <AdminLayout>
@@ -83,7 +98,10 @@ export default function vehicles() {
           </Typography>
 
 
-          <Button variant='contained' color='primary' startIcon={<AddCircleOutline />}>
+          <Button variant='contained' color='primary' onClick={() => setCreateVehicleModalInfo({
+            open: true,
+            result: ''
+          })} startIcon={<AddCircleOutline />}>
             Adicionar veículo
           </Button>
 
@@ -151,14 +169,41 @@ export default function vehicles() {
                     </Card>
                   </Grid>
                 ))
-
             }
           </Grid>
 
         </Box>
 
       </Box>
-
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        open={
+          createVehicleModalInfo.result === '' ? false :
+          createVehicleModalInfo.result === 'success' ? true :
+            createVehicleModalInfo.result === 'error' ? true : false
+        }
+        autoHideDuration={3000}
+        onClose={() => setCreateVehicleModalInfo({
+          open: false,
+          result: ''
+        })}
+      >
+        <SnackbarContent
+          style={{ backgroundColor: createVehicleModalInfo.result === 'success' ? '#4caf50' : 
+          createVehicleModalInfo.result === 'error' ? '#f44336' : ''
+        }}
+          message={
+            createVehicleModalInfo.result === 'success' ?
+              'Veículo cadastrado com sucesso!' :
+              createVehicleModalInfo.result === 'error' ?
+                'Erro ao cadastrar veículo!' : ''
+          }
+        />
+      </Snackbar>
+      <CreateVehicleModal open={createVehicleModalInfo.open} setCreateVehicleModalInfo={setCreateVehicleModalInfo} />
     </AdminLayout >
   )
 }

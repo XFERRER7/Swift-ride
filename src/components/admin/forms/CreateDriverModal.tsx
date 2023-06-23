@@ -23,7 +23,7 @@ const schema = z.object({
 
 type TFormSchema = z.infer<typeof schema>
 
-export const CreateDriverForm = () => {
+export const CreateDriverModal = () => {
 
   const [infoToast, setInfoToast] = useState({
     open: false,
