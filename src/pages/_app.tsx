@@ -32,7 +32,7 @@ export default function MyApp(props: MyAppProps) {
         styleOverrides: {
           root: {
             '&:hover': {
-              backgroundColor: '#29272e',
+              opacity: 0.8
             },
           }
         }
