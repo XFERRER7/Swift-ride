@@ -4,7 +4,6 @@ import Typography from '@mui/material/Typography';
 import Button from "@mui/material/Button"
 import Card from "@mui/material/Card"
 import CardContent from "@mui/material/CardContent"
-import AddCircleOutline from "@mui/icons-material/AddCircleOutline"
 import CardActions from "@mui/material/CardActions"
 import Grid from "@mui/material/Grid"
 import { useEffect, useState } from "react"
@@ -12,28 +11,19 @@ import { api } from "@/lib/api"
 import { DashboardSkeleton } from "@/components/admin/DashboardSkeleton";
 import { GetServerSideProps } from "next";
 import { IDisplacement } from "@/types/displacement";
+import { DeleteItemModal } from "@/components/admin/modal/DeleteItemModal";
+import Snackbar from '@mui/material/Snackbar'
+import SnackbarContent from '@mui/material/SnackbarContent'
 
-interface IDisplacementsProps {
-  data: IDisplacement[]
-}
-
-const driver = {
-  name: 'John Doe',
-  driverLicenseCategory: 'Category A',
-  driverLicenseNumber: '123456789',
-  driverLicenseExpiration: '2023-12-31',
-  data1: 'Data 1',
-  data2: 'Data 2',
-  data3: 'Data 3',
-  data4: 'Data 4',
-  data5: 'Data 5',
-  data6: 'Data 6',
-};
-
-export default function displacements({ data }: IDisplacementsProps) {
+export default function displacements() {
 
   const [displacements, setDisplacements] = useState<IDisplacement[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [deleteItemModalInfo, setDeleteItemModalInfo] = useState({
+    open: false,
+    result: '' as 'success' | 'error' | '',
+  })
+  const [idToDelete, setIdToDelete] = useState(null as null | number)
 
   async function getDataDisplacements() {
 
@@ -68,6 +58,14 @@ export default function displacements({ data }: IDisplacementsProps) {
     setIsLoading(false)
 
   }
+
+  useEffect(() => {
+
+    if (deleteItemModalInfo.result === "success") {
+      getDataDisplacements()
+    }
+
+  }, [deleteItemModalInfo.result])
 
   useEffect(() => {
 
@@ -273,7 +271,7 @@ export default function displacements({ data }: IDisplacementsProps) {
                                   Condutor:
                                 </Typography>
                                 {
-                                  displacement.driverId  ?
+                                  displacement.driverId ?
                                     <Typography variant='body2'>
                                       {displacement.driverId}
                                     </Typography>
@@ -285,7 +283,7 @@ export default function displacements({ data }: IDisplacementsProps) {
                                   Veículo:
                                 </Typography>
                                 {
-                                  displacement.vehicleId  ?
+                                  displacement.vehicleId ?
                                     <Typography variant='body2'>
                                       {displacement.vehicleId}
                                     </Typography>
@@ -310,11 +308,19 @@ export default function displacements({ data }: IDisplacementsProps) {
 
                         </CardContent>
                         <CardActions>
-                          <Button variant='contained' color='error' sx={{ width: '80px' }}>
+                          <Button
+                            variant='contained'
+                            color='error'
+                            sx={{ width: '80px' }}
+                            onClick={() => {
+                              setIdToDelete(displacement.id)
+                              setDeleteItemModalInfo({
+                                open: true,
+                                result: ''
+                              })
+                            }}
+                          >
                             Excluir
-                          </Button>
-                          <Button variant='contained' color='primary' sx={{ marginRight: 1 }}>
-                            Editar
                           </Button>
                         </CardActions>
                       </Card>
@@ -329,6 +335,42 @@ export default function displacements({ data }: IDisplacementsProps) {
 
       </Box>
 
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        open={
+          deleteItemModalInfo.result === 'success' ||
+          deleteItemModalInfo.result === 'error'
+        }
+        autoHideDuration={3000}
+        onClose={() => setDeleteItemModalInfo({
+          open: false,
+          result: ''
+        })}
+      >
+        <SnackbarContent
+          style={{
+            backgroundColor: deleteItemModalInfo.result === 'success' ? '#4caf50' :
+              deleteItemModalInfo.result === 'error' ? '#f44336' : ''
+          }}
+          message={
+            deleteItemModalInfo.result === 'success' ?
+              'Deslocamento excluído com sucesso!' :
+              deleteItemModalInfo.result === 'error' ?
+                'Erro ao excluir deslocamento!' :
+                ''
+          }
+        />
+      </Snackbar>
+
+      <DeleteItemModal
+        open={deleteItemModalInfo.open}
+        id={idToDelete}
+        type="displacement"
+        setDeleteItemModalInfo={setDeleteItemModalInfo}
+      />
     </AdminLayout>
   )
 }
@@ -367,120 +409,3 @@ export const getServerSideProps: GetServerSideProps = async () => {
     }
   }
 }
-
-
-
-{/* <Container>
-        <Tabs variant="fullWidth" value={activeTab} onChange={handleTabChange}>
-          <Tab label="Listar" title="Lista de motoristas cadastrados no sistema" />
-        </Tabs>
-      </Container>
-      <Container>
-
-        <Box p={3}>
-
-          <TableContainer component={Paper} sx={{
-            scrollbarWidth: 'thin',
-            '&::-webkit-scrollbar': {
-              height: '8px',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              background: '#374151',
-              borderRadius: '5px',
-            }
-          }}>
-            <Table aria-label="simple table">
-              <TableHead>
-                <TableRow>
-                  <StyledTableCell>Início</StyledTableCell>
-                  <StyledTableCell align="right">Fim</StyledTableCell>
-                  <StyledTableCell align="right">Km inicial</StyledTableCell>
-                  <StyledTableCell align="right">Km final</StyledTableCell>
-                  <StyledTableCell align="right">CheckList</StyledTableCell>
-                  <StyledTableCell align="right">Motivo</StyledTableCell>
-                  <StyledTableCell align="right">Observações</StyledTableCell>
-                  <StyledTableCell align="right">id Condutor</StyledTableCell>
-                  <StyledTableCell align="right">id Veiculo</StyledTableCell>
-                  <StyledTableCell align="right">id Cliente</StyledTableCell>
-                  <StyledTableCell align="right">Editar</StyledTableCell>
-                  <StyledTableCell align="right">Excluir</StyledTableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {
-                  data.map((displacement: IDisplacement) => (
-                    <TableRow
-                      key={displacement.id}
-                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                    >
-                      <TableCell component="th" scope="row">
-                        {
-                          displacement.startOfDisplacement != '' ? displacement.startOfDisplacement : <Typography color="GrayText" >Não informado</Typography>
-                        }
-                      </TableCell>
-                      <TableCell align="right">
-                        {
-                          displacement.endOfDisplacement != '' ? displacement.endOfDisplacement : <Typography color="GrayText" >Não informado</Typography>
-                        }
-                      </TableCell>
-                      <TableCell align="right">
-                        {
-                          displacement.initialKm
-                        }
-                      </TableCell>
-                      <TableCell align="right">
-                        {
-                          displacement.finalKm
-                        }
-                      </TableCell>
-                      <TableCell align="right">
-                        {
-                          displacement.checkList != '' ? displacement.checkList : <Typography color="GrayText" >Não informado</Typography>
-                        }
-                      </TableCell>
-                      <TableCell align="right">
-                        {
-                          displacement.reason != '' ? displacement.reason : <Typography color="GrayText" >Não informado</Typography>
-                        }
-                      </TableCell>
-                      <TableCell align="right">
-                        {
-                          displacement.observation != '' ? displacement.observation : <Typography color="GrayText" >Não informado</Typography>
-                        }
-                      </TableCell>
-                      <TableCell align="right">
-                        {
-                          displacement.driverId != 0 ? displacement.driverId : <Typography color="GrayText" >Não informado</Typography>
-                        }
-                      </TableCell>
-                      <TableCell align="right">
-                        {
-                          displacement.vehicleId != 0 ? displacement.vehicleId : <Typography color="GrayText" >Não informado</Typography>
-                        }
-                      </TableCell>
-                      <TableCell align="right">
-                        {
-                          displacement.customerId != 0 ? displacement.customerId : <Typography color="GrayText" >Não informado</Typography>
-                        }
-                      </TableCell>
-
-                      <TableCell align="right" sx={{
-                        cursor: "pointer"
-                      }}>
-                        <ModeEdit color='warning' />
-                      </TableCell>
-                      <TableCell align="right" sx={{
-                        cursor: "pointer"
-                      }}>
-                        <Delete color="error" />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                }
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-        </Box>
-
-      </Container> */}

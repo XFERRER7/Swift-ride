@@ -11,6 +11,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { api } from '@/lib/api'
 import Typography from '@mui/material/Typography'
+import CircularProgress from '@mui/material/CircularProgress'
 
 const schema = z.object({
   licensePlate: z.string().nonempty({ message: 'Placa é obrigatória' }),
@@ -35,11 +36,7 @@ interface ICreateVehicleModalProps {
 
 export const CreateVehicleModal = ({ open, setCreateVehicleModalInfo }: ICreateVehicleModalProps) => {
 
-  const [infoToast, setInfoToast] = useState({
-    open: false,
-    message: '' as 'Veículo cadastrado com sucesso' | 'Erro ao cadastrar veículo' | '',
-    type: '' as 'success' | 'error' | ''
-  })
+  const [isSending, setIsSending] = useState(false)
 
   const {
     register,
@@ -51,6 +48,8 @@ export const CreateVehicleModal = ({ open, setCreateVehicleModalInfo }: ICreateV
   })
 
   const onSubmit = async (data: TFormSchema) => {
+
+    setIsSending(true)
 
     try {
 
@@ -68,8 +67,9 @@ export const CreateVehicleModal = ({ open, setCreateVehicleModalInfo }: ICreateV
           result: 'success'
         })
       }
-
+      setIsSending(false)
     } catch (error) {
+      setIsSending(false)
       setCreateVehicleModalInfo({
         open: false,
         result: 'error'
@@ -190,9 +190,11 @@ export const CreateVehicleModal = ({ open, setCreateVehicleModalInfo }: ICreateV
                   cancelar
                 </Button>
                 <Button
+                  disabled={isSending}
+                  startIcon={isSending ? <CircularProgress size={20} color="inherit" /> : null}
                   variant="contained"
-                  type='submit'
                   color="primary"
+                  type='submit'
                 >
                   Cadastrar
                 </Button>
