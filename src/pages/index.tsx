@@ -115,7 +115,7 @@ export default function Home() {
                   justifyContent: 'center'
                 }}>
                   <Button variant="contained" fullWidth onClick={() => {
-                    handleChoice('/client/home')
+                    handleChoice('/client/credentials')
                   }}>Entrar</Button>
                 </CardActions>
               </Card>
