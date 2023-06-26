@@ -8,8 +8,11 @@ import Drawer from '@mui/material/Drawer'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
-import makeStyles from '@mui/material/styles/makeStyles'
-import { ReactNode, useState } from 'react'
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import AccountCircle from '@mui/icons-material/AccountCircle'
+
+import { MouseEvent, ReactNode, useState } from 'react'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import { useRouter } from 'next/router'
 
@@ -30,6 +33,16 @@ export const ClientLayout = ({ children }: IClientLayoutProps) => {
     { title: 'Services', path: '/services' },
     { title: 'Contact', path: '/contact' },
   ];
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleMenu = (event: MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
 
   return (
@@ -52,18 +65,42 @@ export const ClientLayout = ({ children }: IClientLayoutProps) => {
             <MenuIcon />
           </IconButton>
 
-          <Typography variant="h4" fontWeight='bold' sx={{
-            display: {
-              xs: 'none',
-              md: 'block',
-            }
-          }}>
-            Credenciais
-          </Typography>
+
 
           <Typography variant="h6">
             Swift Rider
           </Typography>
+
+          <div>
+            <IconButton
+              size="large"
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleMenu}
+              color="inherit"
+            >
+              <AccountCircle />
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={Boolean(anchorEl)}
+              onClose={handleClose}
+            >
+              <MenuItem onClick={handleClose}>Profile</MenuItem>
+              <MenuItem onClick={handleClose}>My account</MenuItem>
+            </Menu>
+          </div>
 
         </Toolbar>
         <Drawer anchor="left" open={isOpen}

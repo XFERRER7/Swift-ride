@@ -4,6 +4,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const clientSlice = createSlice({
   name: "client",
   initialState: {
+    isAuthenticated: false,
     data: {
       id: 0,
       documentNumber: '',
@@ -29,6 +30,11 @@ const clientSlice = createSlice({
       state.data.neighborhood = action.payload.neighborhood
       state.data.city = action.payload.city
       state.data.uf = action.payload.uf
+
+      if(action.payload.id > 0)
+        state.isAuthenticated = true
+      else
+        state.isAuthenticated = false
 
     },
     setClientRegisteredId: (state, action) => {
