@@ -14,6 +14,13 @@ import IconButton from '@mui/material/IconButton'
 import CloseIcon from '@mui/icons-material/Close'
 import { useState } from 'react'
 import { LoadButton } from '../global/LoadButton'
+import { useRouter } from 'next/router'
+import { useDispatch } from 'react-redux'
+import { setClientRegisteredId } from '@/store/slices/client'
+
+interface IRegisterFormProps {
+  setTabValue: React.Dispatch<React.SetStateAction<number>>
+}
 
 const schema = z.object({
   name: z.string().nonempty({ message: 'Campo obrigatório' }),
@@ -22,13 +29,13 @@ const schema = z.object({
   docNumber: z.string().nonempty({ message: 'Campo obrigatório' }),
   city: z.string().nonempty({ message: 'Campo obrigatório' }),
   uf: z.string().nonempty({ message: 'Campo obrigatório' }),
-  adress: z.string().nonempty({ message: 'Campo obrigatório' }),
-  place: z.string().nonempty({ message: 'Campo obrigatório' }),
+  neighborhood: z.string().nonempty({ message: 'Campo obrigatório' }),
+  street: z.string().nonempty({ message: 'Campo obrigatório' }),
 })
 
 type TFormValues = z.infer<typeof schema>
 
-export const RegisterForm = () => {
+export const RegisterForm = ({ setTabValue }: IRegisterFormProps) => {
 
   const [requestErrorMessage, setRequestErrorMessage] = useState('')
   const [isSending, setIsSending] = useState(false)
@@ -36,6 +43,9 @@ export const RegisterForm = () => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm<TFormValues>({
     resolver: zodResolver(schema)
   })
+
+  const { push } = useRouter()
+  const dispatch = useDispatch()
 
   const onSubmit = async (data: TFormValues) => {
 
@@ -47,13 +57,12 @@ export const RegisterForm = () => {
         numeroDocumento: data.docNumber,
         tipoDocumento: data.docType,
         nome: data.name,
-        logradouro: data.place,
+        logradouro: data.street,
         numero: data.phone,
-        bairro: data.adress,
+        bairro: data.neighborhood,
         cidade: data.city,
         uf: data.uf,
       })
-
 
       if (typeof response.data !== 'number') {
         setIsSending(false)
@@ -62,14 +71,17 @@ export const RegisterForm = () => {
         return
       }
       else if (typeof response.data === 'number') {
+        dispatch(setClientRegisteredId(response.data))
+        setTabValue(0)
         setIsSending(false)
-        alert(response.data)
+  
         reset()
         return
       }
 
 
     } catch (error) {
+      console.log(error)
       setIsSending(false)
       reset()
       setRequestErrorMessage('Erro ao cadastrar cliente')
@@ -197,29 +209,29 @@ export const RegisterForm = () => {
 
         <Grid item xs={12} md={6}>
           <TextField
-            id="Bairro"
-            label="Endereço"
+            id="neighborhood"
+            label="Bairro"
             fullWidth
-            {...register('adress')}
-            error={!!errors.adress}
-            helperText={errors.adress?.message}
+            {...register('neighborhood')}
+            error={!!errors.neighborhood}
+            helperText={errors.neighborhood?.message}
           />
         </Grid>
         <Grid item xs={12} md={6}>
           <TextField
-            id="place"
+            id="street"
             label="Logradouro"
             fullWidth
-            {...register('place')}
-            error={!!errors.place}
-            helperText={errors.place?.message}
+            {...register('street')}
+            error={!!errors.street}
+            helperText={errors.street?.message}
           />
         </Grid>
 
         <Grid item xs={12}>
           <LoadButton
             isSending={isSending}
-            text='Registrar e entrar'
+            text='Registrar'
             variant="contained"
             color='primary'
             fullWidth

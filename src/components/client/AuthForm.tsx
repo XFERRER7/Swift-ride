@@ -12,9 +12,13 @@ import IconButton from '@mui/material/IconButton'
 import CloseIcon from '@mui/icons-material/Close'
 import { useState } from 'react'
 import { LoadButton } from '../global/LoadButton'
+import { useDispatch } from 'react-redux'
+import { setClient } from '@/store/slices/client'
+import { useRouter } from 'next/router'
+import { useAppSelector } from '@/store'
 
 const schema = z.object({
-  docNumber: z.string().nonempty({ message: 'Campo obrigatório' })
+  id: z.string().nonempty({ message: 'Campo obrigatório' })
 })
 
 type TFormValues = z.infer<typeof schema>
@@ -24,9 +28,16 @@ export const AuthForm = () => {
   const [notFoundMessage, setNotFoundMessage] = useState('')
   const [isSending, setIsSending] = useState(false)
 
+  const clientRegisteredId = useAppSelector(state => {
+    return state.client.clientRegisteredId
+  })
+
   const { register, handleSubmit, formState: { errors } } = useForm<TFormValues>({
     resolver: zodResolver(schema)
   })
+
+  const { push } = useRouter()
+  const dispatch = useDispatch()
 
   const onSubmit = async (data: TFormValues) => {
 
@@ -35,17 +46,30 @@ export const AuthForm = () => {
 
     try {
 
-      const response = await api.get('/Cliente')
+      const response = await api.get(`/cliente/${data.id}`)
 
-      const client = response.data.find((client: any) => client.numeroDocumento === data.docNumber)
-
-      if (client == undefined) {
+      if (response.data == undefined) {
         setIsSending(false)
         setNotFoundMessage('Cliente não encontrado')
         return
       }
-      alert('Cliente encontrado')
+
+      dispatch(setClient({
+        id: response.data.id,
+        documentNumber: response.data.numeroDocumento,
+        documentType: response.data.tipoDocumento,
+        name: response.data.nome,
+        street: response.data.logradouro,
+        phone: response.data.numero,
+        neighborhood: response.data.bairro,
+        city: response.data.cidade,
+        uf: response.data.uf,
+      }))
+
       setIsSending(false)
+
+      push('/client/home')
+
     } catch (error) {
       setIsSending(false)
       setNotFoundMessage('Cliente não encontrado')
@@ -60,9 +84,16 @@ export const AuthForm = () => {
       alignItems: 'center',
       width: '100%',
     }}>
+
       <Typography variant="body1" component="h6" fontWeight='semibold' color='GrayText'>
         - Precisamos apenas do seu id de usuário para continuar. Não compartilhe-o com ninguém.
       </Typography>
+      {
+        clientRegisteredId !== 0 &&
+        <Typography variant="body1" component="h6" color='green' fontWeight='semibold'>
+          - O id que está pré selecionado é o último que você cadastrou.
+        </Typography>
+      }
 
       <Collapse in={
         notFoundMessage !== ''
@@ -92,13 +123,16 @@ export const AuthForm = () => {
       }}>
         <Grid item xs={12}>
           <TextField
-            id="docNumber"
+            id="id"
             label="Id de usuário"
             fullWidth
+            defaultValue={
+              clientRegisteredId !== 0 ? clientRegisteredId : ''
+            }
             type='number'
-            {...register('docNumber')}
-            error={!!errors.docNumber}
-            helperText={errors.docNumber?.message}
+            {...register('id')}
+            error={!!errors.id}
+            helperText={errors.id?.message}
           />
         </Grid>
         <Grid item xs={12}>

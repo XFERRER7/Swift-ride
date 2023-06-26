@@ -6,6 +6,7 @@ import Tab from '@mui/material/Tab'
 import Container from '@mui/material/Container'
 import { AuthForm } from '@/components/client/AuthForm'
 import { RegisterForm } from '@/components/client/RegisterForm'
+import { useAppSelector } from '@/store'
 
 interface TabPanelProps {
   children: React.ReactNode;
@@ -20,6 +21,8 @@ export default function credentials() {
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
+
+  const client = useAppSelector(state => state.client)
 
   return (
     <ClientLayout>
@@ -67,7 +70,9 @@ export default function credentials() {
           )}
           {tabValue === 1 && (
             <Box p={3}>
-              <RegisterForm />
+              <RegisterForm
+                setTabValue={setTabValue}
+              />
             </Box>
           )}
         </Container>
