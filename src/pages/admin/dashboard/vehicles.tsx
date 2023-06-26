@@ -15,6 +15,7 @@ import { CreateVehicleModal } from "@/components/admin/modal/CreateVehicleModal"
 import Snackbar from '@mui/material/Snackbar'
 import SnackbarContent from '@mui/material/SnackbarContent'
 import { DeleteItemModal } from "@/components/admin/modal/DeleteItemModal";
+import { EditVehicleModal, IVehicleInfo } from "@/components/admin/modal/EditVehicleModal";
 
 export default function vehicles() {
 
@@ -24,9 +25,20 @@ export default function vehicles() {
     open: false,
     result: '' as 'success' | 'error' | ''
   })
+  const [editVehicleModalInfo, setEditVehicleModalInfo] = useState({
+    open: false,
+    result: '' as 'success' | 'error' | ''
+  })
   const [deleteItemModalInfo, setDeleteItemModalInfo] = useState({
     open: false,
     result: '' as 'success' | 'error' | '',
+  })
+
+  const [vehicleToEditInfo, setVehicleToEditInfo] = useState<IVehicleInfo>({
+    id: 0,
+    brandModel: '',
+    manufacturingYear: 0,
+    currentKm: 0,
   })
   const [idToDelete, setIdToDelete] = useState(null as null | number)
 
@@ -57,12 +69,11 @@ export default function vehicles() {
   }
 
   useEffect(() => {
-    
-    if (createVehicleModalInfo.result === "success" || deleteItemModalInfo.result === "success") {
+    if (createVehicleModalInfo.result === "success" || deleteItemModalInfo.result === "success" || editVehicleModalInfo.result === "success") {
       getDataVehicles()
     }
 
-  }, [createVehicleModalInfo.result, deleteItemModalInfo.result])
+  }, [createVehicleModalInfo.result, deleteItemModalInfo.result, editVehicleModalInfo.result])
 
   useEffect(() => {
     getDataVehicles()
@@ -164,17 +175,33 @@ export default function vehicles() {
                         <Button variant='contained' color='error' sx={{
                           width: '80px',
                         }}
-                        onClick={() => {
-                          setIdToDelete(vehicle.id)
-                          setDeleteItemModalInfo({
-                            open: true,
-                            result: ''
-                          })
-                        }}
+                          onClick={() => {
+                            setIdToDelete(vehicle.id)
+                            setDeleteItemModalInfo({
+                              open: true,
+                              result: ''
+                            })
+                          }}
                         >
                           Excluir
                         </Button>
-                        <Button variant='contained' color='primary' sx={{ marginRight: 1 }}>
+                        <Button
+                          variant='contained'
+                          color='primary'
+                          sx={{ marginRight: 1 }}
+                          onClick={() => {
+                            setVehicleToEditInfo({
+                              id: vehicle.id,
+                              brandModel: vehicle.brandModel,
+                              manufacturingYear: Number(vehicle.manufacturingYear),
+                              currentKm: vehicle.currentKm,
+                            })
+                            setEditVehicleModalInfo({
+                              open: true,
+                              result: ''
+                            })
+                          }}
+                        >
                           Editar
                         </Button>
                       </CardActions>
@@ -193,29 +220,60 @@ export default function vehicles() {
           horizontal: 'right',
         }}
         open={
-          createVehicleModalInfo.result === '' ? false :
           createVehicleModalInfo.result === 'success' ? true :
-            createVehicleModalInfo.result === 'error' ? true : false
+            createVehicleModalInfo.result === 'error' ? true :
+              deleteItemModalInfo.result === 'success' ? true :
+                deleteItemModalInfo.result === 'error' ? true :
+                  editVehicleModalInfo.result === 'success' ? true :
+                    editVehicleModalInfo.result === 'error' ? true : false
         }
-        autoHideDuration={3000}
-        onClose={() => setCreateVehicleModalInfo({
-          open: false,
-          result: ''
-        })}
+        autoHideDuration={2000}
+        onClose={() => {
+          setCreateVehicleModalInfo({
+            open: false,
+            result: ''
+          })
+          setEditVehicleModalInfo({
+            open: false,
+            result: ''
+          })
+          setDeleteItemModalInfo({
+            open: false,
+            result: ''
+          })
+        }}
       >
         <SnackbarContent
-          style={{ backgroundColor: createVehicleModalInfo.result === 'success' ? '#4caf50' : 
-          createVehicleModalInfo.result === 'error' ? '#f44336' : ''
-        }}
+          style={{
+            backgroundColor: createVehicleModalInfo.result === 'success' ? '#4caf50' :
+              createVehicleModalInfo.result === 'error' ? '#f44336' :
+                deleteItemModalInfo.result === 'success' ? '#4caf50' :
+                  deleteItemModalInfo.result === 'error' ? '#f44336' :
+                    editVehicleModalInfo.result === 'success' ? '#4caf50' :
+                      editVehicleModalInfo.result === 'error' ? '#f44336' : ''
+          }}
           message={
             createVehicleModalInfo.result === 'success' ?
               'Veículo cadastrado com sucesso!' :
               createVehicleModalInfo.result === 'error' ?
-                'Erro ao cadastrar veículo!' : ''
+                'Erro ao cadastrar veículo!' :
+                deleteItemModalInfo.result === 'success' ?
+                  'Veículo excluído com sucesso!' :
+                  deleteItemModalInfo.result === 'error' ?
+                    'Erro ao excluir veículo!' :
+                    editVehicleModalInfo.result === 'success' ?
+                      'Veículo editado com sucesso!' :
+                      editVehicleModalInfo.result === 'error' ?
+                        'Erro ao editar veículo!' : ''
           }
         />
       </Snackbar>
       <CreateVehicleModal open={createVehicleModalInfo.open} setCreateVehicleModalInfo={setCreateVehicleModalInfo} />
+      <EditVehicleModal
+        open={editVehicleModalInfo.open}
+        setEditVehicleModalInfo={setEditVehicleModalInfo}
+        vehicle={vehicleToEditInfo}
+      />
       <DeleteItemModal
         open={deleteItemModalInfo.open}
         id={idToDelete}

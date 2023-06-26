@@ -15,6 +15,7 @@ import Snackbar from '@mui/material/Snackbar'
 import SnackbarContent from '@mui/material/SnackbarContent'
 import { CreateDriverModal } from "@/components/admin/modal/CreateDriverModal"
 import { DeleteItemModal } from "@/components/admin/modal/DeleteItemModal"
+import { EditDriverModal } from "@/components/admin/modal/EditDriverModal"
 
 export default function drivers() {
 
@@ -24,9 +25,19 @@ export default function drivers() {
     open: false,
     result: '' as 'success' | 'error' | ''
   })
+  const [editDriverModalInfo, setEditDriverModalInfo] = useState({
+    open: false,
+    result: '' as 'success' | 'error' | ''
+  })
   const [deleteItemModalInfo, setDeleteItemModalInfo] = useState({
     open: false,
     result: '' as 'success' | 'error' | '',
+  })
+
+  const [driverToEditInfo, setDriverToEditInfo] = useState({
+    id: 0,
+    driverLicenseCategory: '',
+    driverLicenseExpiration: '',
   })
   const [idToDelete, setIdToDelete] = useState(null as null | number)
 
@@ -59,11 +70,11 @@ export default function drivers() {
 
   useEffect(() => {
 
-    if (createDriverModalInfo.result === "success" || deleteItemModalInfo.result === "success") {
+    if (createDriverModalInfo.result === "success" || deleteItemModalInfo.result === "success" || editDriverModalInfo.result === "success") {
       getDataDrivers()
     }
 
-  }, [createDriverModalInfo.result, deleteItemModalInfo.result])
+  }, [createDriverModalInfo.result, deleteItemModalInfo.result, editDriverModalInfo.result])
 
   useEffect(() => {
     getDataDrivers()
@@ -210,7 +221,22 @@ export default function drivers() {
                         >
                           Excluir
                         </Button>
-                        <Button variant='contained' color='primary' sx={{ marginRight: 1 }}>
+                        <Button
+                          variant='contained'
+                          color='primary'
+                          sx={{ marginRight: 1 }}
+                          onClick={() => {
+                            setDriverToEditInfo({
+                              id: driver.id,
+                              driverLicenseCategory: driver.driverLicenseCategory,
+                              driverLicenseExpiration: driver.driverLicenseExpiration,
+                            })
+                            setEditDriverModalInfo({
+                              open: true,
+                              result: ''
+                            })
+                          }}
+                        >
                           Editar
                         </Button>
                       </CardActions>
@@ -234,32 +260,62 @@ export default function drivers() {
           horizontal: 'right',
         }}
         open={
-          createDriverModalInfo.result === '' ? false :
-            createDriverModalInfo.result === 'success' ? true :
-              createDriverModalInfo.result === 'error' ? true : false
+          createDriverModalInfo.result === 'success' ? true :
+            createDriverModalInfo.result === 'error' ? true :
+              deleteItemModalInfo.result === 'success' ? true :
+                deleteItemModalInfo.result === 'error' ? true :
+                  editDriverModalInfo.result === 'success' ? true :
+                    editDriverModalInfo.result === 'error' ? true : false
         }
-        autoHideDuration={3000}
-        onClose={() => setCreateDriverModalInfo({
-          open: false,
-          result: ''
-        })}
+        autoHideDuration={2000}
+        onClose={() => {
+          setCreateDriverModalInfo({
+            open: false,
+            result: ''
+          })
+          setEditDriverModalInfo({
+            open: false,
+            result: ''
+          })
+          setDeleteItemModalInfo({
+            open: false,
+            result: ''
+          })
+        }}
       >
         <SnackbarContent
           style={{
             backgroundColor: createDriverModalInfo.result === 'success' ? '#4caf50' :
-              createDriverModalInfo.result === 'error' ? '#f44336' : ''
+              createDriverModalInfo.result === 'error' ? '#f44336' :
+                deleteItemModalInfo.result === 'success' ? '#4caf50' :
+                  deleteItemModalInfo.result === 'error' ? '#f44336' :
+                    editDriverModalInfo.result === 'success' ? '#4caf50' :
+                      editDriverModalInfo.result === 'error' ? '#f44336' : ''
           }}
           message={
             createDriverModalInfo.result === 'success' ?
-              'Veículo cadastrado com sucesso!' :
+              'Motorista cadastrado com sucesso!' :
               createDriverModalInfo.result === 'error' ?
-                'Erro ao cadastrar veículo!' : ''
+                'Erro ao cadastrar motorista!' :
+                deleteItemModalInfo.result === 'success' ?
+                  'Motorista excluído com sucesso!' :
+                  deleteItemModalInfo.result === 'error' ?
+                    'Erro ao excluir motorista!' :
+                    editDriverModalInfo.result === 'success' ?
+                      'Motorista editado com sucesso!' :
+                      editDriverModalInfo.result === 'error' ?
+                        'Erro ao editar motorista!' : ''
           }
         />
       </Snackbar>
       <CreateDriverModal
         open={createDriverModalInfo.open}
         setCreateDriverModalInfo={setCreateDriverModalInfo}
+      />
+      <EditDriverModal 
+        open={editDriverModalInfo.open}
+        setEditDriverModalInfo={setEditDriverModalInfo}
+        driver={driverToEditInfo}
       />
       <DeleteItemModal
         open={deleteItemModalInfo.open}

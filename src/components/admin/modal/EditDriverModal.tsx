@@ -2,7 +2,7 @@ import Grid from '@mui/material/Grid'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import MenuItem from '@mui/material/MenuItem'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -10,68 +10,89 @@ import { api } from '@/lib/api'
 import Box from '@mui/material/Box'
 import Modal from '@mui/material/Modal'
 import Typography from '@mui/material/Typography'
-import { format } from 'date-fns'
+import { add, format, isAfter, isEqual, parseISO } from 'date-fns';
 import CircularProgress from '@mui/material/CircularProgress'
+import Alert from '@mui/material/Alert'
+import Collapse from '@mui/material/Collapse'
+import IconButton from '@mui/material/IconButton'
+import CloseIcon from '@mui/icons-material/Close'
 
 const schema = z.object({
-  name: z.string().nonempty({ message: 'Nome é obrigatório' }),
-  registerNumber: z.string().regex(/^\d+$/, { message: 'Nº de registro deve conter apenas números' }),
-  licenseCategory: z.string().regex(/^[A-D]$/, { message: 'Categoria de habilitação inválida' }).nonempty({ message: 'Categoria de habilitação é obrigatório' }),
+  licenseCategory: z.string(),
   licenseExpirationDate: z.string().
     nonempty({ message: 'Data de validade da habilitação é obrigatório' }).
     regex(/^\d{2}\/\d{2}\/\d{4}$/, { message: 'Data de validade da habilitação inválida' }),
-
-})
+});
 
 type TFormSchema = z.infer<typeof schema>
 
-interface ICreateDriverModalProps {
+interface IDriverInfo {
+  id: number
+  driverLicenseCategory: string
+  driverLicenseExpiration: string
+}
+
+interface IEditDriverModalProps {
   open: boolean
-  setCreateDriverModalInfo: React.Dispatch<React.SetStateAction<{
+  driver: IDriverInfo
+  setEditDriverModalInfo: React.Dispatch<React.SetStateAction<{
     open: boolean
     result: 'success' | 'error' | ''
   }>>
 }
 
-export const CreateDriverModal = ({ open, setCreateDriverModalInfo }: ICreateDriverModalProps) => {
+export const EditDriverModal = ({ open, driver, setEditDriverModalInfo }: IEditDriverModalProps) => {
 
   const [isSending, setIsSending] = useState(false)
+  const [error, setError] = useState('')
 
-  const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<TFormSchema>({
+  const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<TFormSchema>({
     resolver: zodResolver(schema)
   })
 
   const onSubmit = async (data: TFormSchema) => {
 
-    const dateParts = data.licenseExpirationDate.split('/')
-    const year = parseInt(dateParts[2], 10)
-    const month = parseInt(dateParts[1], 10) - 1
-    const day = parseInt(dateParts[0], 10)
-
-    const formattedDate = format(new Date(year, month, day), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-
     setIsSending(true)
+    const dateParts = data.licenseExpirationDate.split('/');
+    const year = parseInt(dateParts[2], 10);
+    const month = parseInt(dateParts[1], 10) - 1;
+    const day = parseInt(dateParts[0], 10);
 
+    const formattedDate = format(new Date(year, month, day), "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+    const date1 = new Date(formattedDate)
+    const date2 = new Date(driver.driverLicenseExpiration)
+
+    if (isAfter(date2, date1)) {
+      setError('Data de validade da habilitação deve ser maior que a data atual')
+      setIsSending(false)
+      return
+    }
+    console.log({
+      data1: data.licenseCategory,
+      data2: driver.driverLicenseCategory
+    })
     try {
-
-      const response = await api.post('/Condutor', {
-        nome: data.name,
-        numeroHabilitacao: data.registerNumber,
-        categoriaHabilitacao: data.licenseCategory,
+      const response = await api.put(`/Condutor/${driver.id}`, {
+        id: driver.id,
+        categoriaHabilitacao: data.licenseCategory != driver.driverLicenseCategory ?
+          `${driver.driverLicenseCategory}, ${data.licenseCategory}` : '',
         vencimentoHabilitacao: formattedDate
       })
 
-      if (typeof response.data === 'number') {
+      if (response.status === 200) {
         reset()
-        setCreateDriverModalInfo({
+        setEditDriverModalInfo({
           open: false,
           result: 'success'
         })
       }
       setIsSending(false)
+      setError('')
     } catch (error) {
+      setError('')
       setIsSending(false)
-      setCreateDriverModalInfo({
+      setEditDriverModalInfo({
         open: false,
         result: 'error'
       })
@@ -82,15 +103,29 @@ export const CreateDriverModal = ({ open, setCreateDriverModalInfo }: ICreateDri
   const maskDate = (value: string) => {
 
     if (!value) return value
-    let v = value.replace(/\D/g, '').slice(0, 10)
+    let v = value.replace(/\D/g, '').slice(0, 10);
     if (v.length >= 5) {
-      return `${v.slice(0, 2)}/${v.slice(2, 4)}/${v.slice(4)}`
+      return `${v.slice(0, 2)}/${v.slice(2, 4)}/${v.slice(4)}`;
     }
     else if (v.length >= 3) {
-      return `${v.slice(0, 2)}/${v.slice(2)}`
+      return `${v.slice(0, 2)}/${v.slice(2)}`;
     }
     return v
   }
+
+  useEffect(() => {
+    const date =
+      driver.driverLicenseExpiration
+        .split('T')[0]
+        .replace(/(\d{4})-(\d{2})-(\d{2})/, '$3/$2/$1')
+
+    setValue('licenseExpirationDate', date)
+
+    reset({
+      licenseCategory: driver.driverLicenseCategory,
+      licenseExpirationDate: date
+    })
+  }, [driver, reset])
 
   const licenseExpirationDate = watch('licenseExpirationDate')
 
@@ -98,7 +133,7 @@ export const CreateDriverModal = ({ open, setCreateDriverModalInfo }: ICreateDri
     <div>
       <Modal
         open={open}
-        onClose={() => setCreateDriverModalInfo({
+        onClose={() => setEditDriverModalInfo({
           open: false,
           result: ''
         })}
@@ -117,39 +152,42 @@ export const CreateDriverModal = ({ open, setCreateDriverModalInfo }: ICreateDri
           boxShadow: 24,
           p: 4,
         }}>
-
+          <Collapse in={
+            error !== ''
+          }>
+            <Alert
+              severity="error"
+              action={
+                <IconButton
+                  aria-label="close"
+                  color="inherit"
+                  size="small"
+                  onClick={() => {
+                    setError('')
+                  }}
+                >
+                  <CloseIcon fontSize="inherit" />
+                </IconButton>
+              }
+              sx={{ mb: 2 }}
+            >
+              {error}
+            </Alert>
+          </Collapse>
           <Typography id="modal-modal-title" variant="h6" component="h2" sx={{
             marginBottom: '1rem',
             textAlign: 'center'
           }}>
-            Cadastrar novo condutor
+            Atualizar condutor
           </Typography>
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <Grid container spacing={2}>
               <Grid item xs={6}>
                 <TextField
-                  label="Nome"
-                  fullWidth
-                  {...register('name')}
-                  error={!!errors.name}
-                  helperText={errors.name?.message}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label="Nº de registro "
-                  fullWidth
-                  {...register('registerNumber')}
-                  error={!!errors.registerNumber}
-                  helperText={errors.registerNumber?.message}
-                  inputProps={{ inputMode: 'numeric' }}
-                />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField
-                  label="Categoria da habilitação"
+                  label="Adicione mais uma categoria"
                   select
+                  placeholder='Adicione mais uma categoria'
                   fullWidth
                   {...register('licenseCategory')}
                   error={!!errors.licenseCategory}
@@ -176,7 +214,8 @@ export const CreateDriverModal = ({ open, setCreateDriverModalInfo }: ICreateDri
               </Grid>
               <Grid item xs={12} display='flex' justifyContent='center' gap={10} marginTop={5}>
                 <Button variant="contained" onClick={() => {
-                  setCreateDriverModalInfo({
+                  setError('')
+                  setEditDriverModalInfo({
                     open: false,
                     result: ''
                   })
@@ -192,7 +231,7 @@ export const CreateDriverModal = ({ open, setCreateDriverModalInfo }: ICreateDri
                   color="primary"
                   type='submit'
                 >
-                  Cadastrar
+                  Confirmar
                 </Button>
               </Grid>
             </Grid>

@@ -8,7 +8,7 @@ import { api } from '@/lib/api'
 
 interface IDeleteItemModalProps {
   open: boolean
-  type: 'driver' | 'vehicle'
+  type: 'driver' | 'vehicle' | 'displacement'
   id: null | number
   setDeleteItemModalInfo: React.Dispatch<React.SetStateAction<{
     open: boolean
@@ -24,7 +24,7 @@ export const DeleteItemModal = ({ open, type, id, setDeleteItemModalInfo }: IDel
 
     try {
       
-      const url = type === 'driver' ? '/Condutor' : type === 'vehicle' ? '/Veiculo' : ''
+      const url = type === 'driver' ? '/Condutor' : type === 'vehicle' ? '/Veiculo' : '/Deslocamento'
 
       setIsDeleting(true)
 
@@ -87,7 +87,7 @@ export const DeleteItemModal = ({ open, type, id, setDeleteItemModalInfo }: IDel
                 'Tem certeza que deseja excluir este motorista?' :
                 type === 'vehicle' ?
                   'Tem certeza que deseja excluir este veículo?' :
-                  'Tem certeza que deseja excluir este item?'
+                  'Tem certeza que deseja excluir este deslocamento?'
             }
           </Typography>
 
