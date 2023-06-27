@@ -39,9 +39,22 @@ const clientSlice = createSlice({
     },
     setClientRegisteredId: (state, action) => {
       state.clientRegisteredId = action.payload
+    },
+    logout: (state) => {
+      state.isAuthenticated = false
+      state.data.id = 0
+      state.data.documentNumber = ''
+      state.data.documentType = ''
+      state.data.name = ''
+      state.data.street = ''
+      state.data.phone = ''
+      state.data.neighborhood = ''
+      state.data.city = ''
+      state.data.uf = ''
+      state.clientRegisteredId = 0
     }
   }
 })
 
 export const client = clientSlice.reducer
-export const { setClient, setClientRegisteredId } = clientSlice.actions
+export const { setClient, setClientRegisteredId, logout } = clientSlice.actions
