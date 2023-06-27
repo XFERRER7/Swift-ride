@@ -16,7 +16,7 @@ import { useEffect, useState } from "react"
 
 export default function home() {
 
-  const client = useAppSelector(state => state.client.data)
+  const client = useAppSelector(state => state.data)
   const { push } = useRouter()
 
   const getCurrentTime = () => {
@@ -48,10 +48,15 @@ export default function home() {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        p: {
+        mt: 10,
+        paddingLeft: {
           xs: 2,
           md: 20,
-        }
+        },
+        paddingRight: {
+          xs: 2,
+          md: 20,
+        },
       }}>
         <Grid container spacing={2}>
           <Grid item xs={12}>
@@ -80,13 +85,13 @@ export default function home() {
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'center',
-                alignItems: 'center',
+               
               }}>
                 <Typography variant="body1" component="div" color='gold'>
                   Cliente Premium
                 </Typography>
                 <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-                  Nikola Joker
+                  {client.name}
                 </Typography>
 
               </Box>
@@ -98,11 +103,9 @@ export default function home() {
                   right: 0,
                   transform: 'translate(50%, -50%) rotate(45deg)',
                   backgroundColor: 'gold',
-                  color: (theme) => theme.palette.primary.contrastText,
                   padding: '10px 14px',
                   borderRadius: 2,
                 }}
-                badgeContent="Premium"
                 anchorOrigin={{
                   vertical: 'top',
                   horizontal: 'right',

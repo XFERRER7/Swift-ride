@@ -22,7 +22,7 @@ export default function credentials() {
     setTabValue(newValue);
   };
 
-  const client = useAppSelector(state => state.client)
+  const client = useAppSelector(state => state.data)
 
   return (
     <ClientLayout>

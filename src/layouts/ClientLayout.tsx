@@ -17,13 +17,14 @@ import { MouseEvent, ReactNode, useState } from 'react'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import { useRouter } from 'next/router'
 import { logout } from '@/store/slices/client'
+import { useAppSelector } from '@/store'
 
 interface IClientLayoutProps {
   children: ReactNode
 }
 
 const navLinks = [
-  { title: 'Home', path: '/client/' },
+  { title: 'Home', path: '/client/home' },
   { title: 'Credenciais', path: '/client/credentials' },
   { title: 'Viagem', path: '/client/ride' },
   { title: 'Delivery', path: '/client/delivery' },
@@ -33,6 +34,8 @@ export const ClientLayout = ({ children }: IClientLayoutProps) => {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [isOpen, setIsOpen] = useState(false)
+
+  const client = useAppSelector(state => state.data)
 
   const dispatch = useDispatch()
   const { pathname, push } = useRouter()
@@ -77,7 +80,10 @@ export const ClientLayout = ({ children }: IClientLayoutProps) => {
             Swift Rider
           </Typography>
 
-          <div>
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}>
             <IconButton
               size="large"
               aria-label="account of current user"
@@ -88,6 +94,11 @@ export const ClientLayout = ({ children }: IClientLayoutProps) => {
             >
               <AccountCircle />
             </IconButton>
+
+            <Typography variant="body1" fontWeight='bold' sx={{}}>
+              {client?.name}
+            </Typography>
+
             <Menu
               id="menu-appbar"
               anchorEl={anchorEl}
@@ -108,7 +119,7 @@ export const ClientLayout = ({ children }: IClientLayoutProps) => {
               }}>Meu perfil</MenuItem>
               <MenuItem onClick={handleLogout}>Sair</MenuItem>
             </Menu>
-          </div>
+          </Box>
 
         </Toolbar>
         <Drawer anchor="left" open={isOpen}
@@ -127,10 +138,10 @@ export const ClientLayout = ({ children }: IClientLayoutProps) => {
 
             }}>
               {
-                pathname === '/client/credentials' ? 'Credenciais' : 
-                pathname === '/client/home' ? 'Menu' :
-                pathname === '/client/ride' ? 'Viagem' :
-                pathname === '/client/delivery' ? 'Entrega' : 'Swift Rider'
+                pathname === '/client/credentials' ? 'Credenciais' :
+                  pathname === '/client/home' ? 'Menu' :
+                    pathname === '/client/ride' ? 'Viagem' :
+                      pathname === '/client/delivery' ? 'Entrega' : 'Swift Rider'
               }
             </Typography>
 
