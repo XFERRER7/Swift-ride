@@ -77,7 +77,7 @@ export default function delivery({ drivers, vehicles }: IDeliveryProps) {
       const response = await api.post('/Deslocamento/IniciarDeslocamento', {
         kmInicial: deliveryInfo.currentKm || 0,
         inicioDeslocamento: new Date(),
-        checkList: 'Não entregue',
+        checkList: 'Entregue',
         motivo: deliveryInfo.reason,
         observacao: deliveryInfo.observations || '',
         idCondutor: deliveryInfo.driverId || 0,
@@ -88,8 +88,8 @@ export default function delivery({ drivers, vehicles }: IDeliveryProps) {
       if (response.status === 200) {
 
         setIsSending(false)
+        push(`/client/success/${response.data}`)
         dispatch(clearDelivery())
-        push('/client/success')
 
       }
 
@@ -214,6 +214,10 @@ export default function delivery({ drivers, vehicles }: IDeliveryProps) {
                                   <TextField
                                     label="Observações (opcional)"
                                     fullWidth
+                                    value={
+                                      deliveryInfo.observations === null ?
+                                        '' : deliveryInfo.observations
+                                    }
                                     onChange={(e) => dispatch(setObservations(e.target.value))}
                                   />
                                 </Grid>
@@ -222,6 +226,10 @@ export default function delivery({ drivers, vehicles }: IDeliveryProps) {
                                     label="Km correspondente a seu endereço"
                                     fullWidth
                                     type="number"
+                                    value={
+                                      deliveryInfo.currentKm === null ?
+                                        0 : deliveryInfo.currentKm
+                                    }
                                     onChange={(e) => dispatch(setCurrentKm(Number(e.target.value)))}
                                     error={
                                       deliveryInfo.currentKm &&
@@ -321,7 +329,7 @@ export default function delivery({ drivers, vehicles }: IDeliveryProps) {
           horizontal: 'right',
         }}
         open={
-         messageErrorOnRequest !== ''
+          messageErrorOnRequest !== ''
         }
         autoHideDuration={2000}
         onClose={() => {
@@ -334,14 +342,14 @@ export default function delivery({ drivers, vehicles }: IDeliveryProps) {
               messageErrorOnRequest === 'error' ? '#f44336' : '',
           }}
           message={
-            messageErrorOnRequest === 'success' ? 
-            'Entrega cadastrada com sucesso!' :
-            messageErrorOnRequest === 'error' ?
-            'Erro ao cadastrar entrega!' : ''
+            messageErrorOnRequest === 'success' ?
+              'Entrega cadastrada com sucesso!' :
+              messageErrorOnRequest === 'error' ?
+                'Erro ao cadastrar entrega!' : ''
           }
         />
       </Snackbar>
-      
+
     </ClientLayout>
   )
 }

@@ -50,5 +50,7 @@ export const  {
   setVehicleId,
   setObservations,
   setReason,
-  clearDelivery
+  clearDelivery,
+  setDisplacementId,
+  clearDisplacementId
 } = deliverySlice.actions
