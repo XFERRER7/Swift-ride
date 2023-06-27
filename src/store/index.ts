@@ -1,18 +1,31 @@
-import { configureStore, createSlice } from "@reduxjs/toolkit";
+import { combineReducers, configureStore, createSlice } from "@reduxjs/toolkit";
 import { useSelector, TypedUseSelectorHook } from 'react-redux'
 import { client } from "./slices/client";
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
+import { delivery } from "./slices/delivery";
 
-const persistConfig = {
-  key: 'root',
+const clientPersistConfig = {
+  key: 'client',
   storage,
 };
 
-const persistedReducer = persistReducer(persistConfig, client);
+const deliveryPersistConfig = {
+  key: 'delivery',
+  storage,
+};
+
+
+const persistedClientReducer = persistReducer(clientPersistConfig, client);
+const persistedDeliveryReducer = persistReducer(deliveryPersistConfig, delivery);
+
+const rootReducer = combineReducers({
+  client: persistedClientReducer,
+  delivery: persistedDeliveryReducer,
+});
 
 export const store = configureStore({
-  reducer: persistedReducer,
+  reducer: rootReducer,
 });
 
 export type RootState = ReturnType<typeof store.getState>

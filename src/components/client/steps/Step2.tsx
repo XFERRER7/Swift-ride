@@ -6,14 +6,21 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { useState } from "react"
 import { IVehicle } from '@/types/vehicle';
+import { useAppSelector } from '@/store';
+import { useDispatch } from 'react-redux';
+import { setVehicleId } from '@/store/slices/delivery';
 
 interface IStep1Props {
   vehicles: IVehicle[]
-  selectedVehicle: number | null
-  setSelectedVehicle: React.Dispatch<React.SetStateAction<number | null>>
 }
 
-export const Step2 = ({ vehicles, setSelectedVehicle, selectedVehicle }: IStep1Props) => {
+export const Step2 = ({ vehicles }: IStep1Props) => {
+
+  const { vehicleId: selectedVehicle } = useAppSelector(state => state.delivery)
+
+  const dispatch = useDispatch()
+
+
   return (
     <Box sx={{
       width: {
@@ -55,25 +62,25 @@ export const Step2 = ({ vehicles, setSelectedVehicle, selectedVehicle }: IStep1P
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
                     {
-                     `Placa:  ${vehicle.licensePlate}`
+                      `Placa:  ${vehicle.licensePlate}`
                     }
                   </Typography>
-                  <Button 
-                  variant="contained" 
-                  disabled={
-                    selectedVehicle !== null && selectedVehicle !== vehicle.id
-                  }
-                  color={
-                    selectedVehicle === vehicle.id ? 'success' : 'primary'
-                  }
-                  onClick={() => {
-                    if (selectedVehicle === vehicle.id) {
-                      setSelectedVehicle(null)
+                  <Button
+                    variant="contained"
+                    disabled={
+                      selectedVehicle !== null && selectedVehicle !== vehicle.id
                     }
-                    else {
-                      setSelectedVehicle(vehicle.id)
+                    color={
+                      selectedVehicle === vehicle.id ? 'success' : 'primary'
                     }
-                  }}>
+                    onClick={() => {
+                      if (selectedVehicle === vehicle.id) {
+                        dispatch(setVehicleId(null))
+                      }
+                      else {
+                        dispatch(setVehicleId(vehicle.id))
+                      }
+                    }}>
                     {
                       selectedVehicle === vehicle.id ? 'Selecionado' : 'Selecionar'
                     }

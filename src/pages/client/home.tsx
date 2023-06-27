@@ -16,7 +16,7 @@ import { useEffect, useState } from "react"
 
 export default function home() {
 
-  const client = useAppSelector(state => state.data)
+  const client = useAppSelector(state => state.client.data)
   const { push } = useRouter()
 
   const getCurrentTime = () => {
@@ -151,7 +151,7 @@ export default function home() {
                   Delivery
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
-                  Descrição do serviço de Delivery.
+                  Selecione um motorista e um carro para entregar um produto seu em qualquer lugar da cidade.
                 </Typography>
               </CardContent>
             </Card>
@@ -182,7 +182,7 @@ export default function home() {
                   Viagem
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
-                  Descrição do serviço de Viagem.
+                  Selecione um motorista e um carro para viajar para qualquer lugar da cidade.
                 </Typography>
               </CardContent>
             </Card>

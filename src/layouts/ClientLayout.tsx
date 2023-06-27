@@ -35,7 +35,7 @@ export const ClientLayout = ({ children }: IClientLayoutProps) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const [isOpen, setIsOpen] = useState(false)
 
-  const client = useAppSelector(state => state.data)
+  const client = useAppSelector(state => state.client.data)
 
   const dispatch = useDispatch()
   const { pathname, push } = useRouter()

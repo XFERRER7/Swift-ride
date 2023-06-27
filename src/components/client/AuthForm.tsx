@@ -29,7 +29,7 @@ export const AuthForm = () => {
   const [isSending, setIsSending] = useState(false)
 
   const clientRegisteredId = useAppSelector(state => {
-    return state.clientRegisteredId
+    return state.client.clientRegisteredId
   })
 
   const { register, handleSubmit, formState: { errors } } = useForm<TFormValues>({

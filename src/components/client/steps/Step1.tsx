@@ -6,14 +6,20 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { useState } from "react"
 import { IDriver } from '@/types/driver';
+import { useAppSelector } from '@/store';
+import { useDispatch } from 'react-redux';
+import { setDriverId } from '@/store/slices/delivery';
 
 interface IStep1Props {
   drivers: IDriver[]
-  selectedDriver: number | null
-  setSelectedDriver: React.Dispatch<React.SetStateAction<number | null>>
 }
 
-export const Step1 = ({ drivers, setSelectedDriver, selectedDriver }: IStep1Props) => {
+export const Step1 = ({ drivers}: IStep1Props) => {
+
+  const { driverId: selectedDriver } = useAppSelector(state => state.delivery)
+  
+  const dispatch = useDispatch()
+
   return (
     <Box sx={{
       width: {
@@ -68,10 +74,10 @@ export const Step1 = ({ drivers, setSelectedDriver, selectedDriver }: IStep1Prop
                   }
                   onClick={() => {
                     if (selectedDriver === driver.id) {
-                      setSelectedDriver(null)
+                      dispatch(setDriverId(null))
                     }
                     else {
-                      setSelectedDriver(driver.id)
+                      dispatch(setDriverId(driver.id))
                     }
                   }}>
                     {
