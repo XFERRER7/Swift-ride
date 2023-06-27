@@ -13,8 +13,11 @@ import Collapse from '@mui/material/Collapse'
 import IconButton from '@mui/material/IconButton'
 import CloseIcon from '@mui/icons-material/Close'
 import { useDispatch } from "react-redux"
-import { clearDisplacementId } from "@/store/slices/delivery"
+import { clearDelivery, clearDisplacementId, setFinalKm } from "@/store/slices/delivery"
 import { LoadButton } from "@/components/global/LoadButton"
+import { useAppSelector } from "@/store"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
 
 function LinearProgressWithLabel(props: { value: number }) {
   return (
@@ -45,6 +48,8 @@ export default function Success() {
   const [isDeliveryFinished, setIsDeliveryFinished] = useState(false)
   const [error, setError] = useState('')
   const [isSending, setIsSending] = useState(false)
+
+  const { finalKm } = useAppSelector(state => state.delivery)
 
   const router = useRouter()
   const { id } = router.query
@@ -86,22 +91,16 @@ export default function Success() {
 
     try {
 
-      console.log({
-        id,
-        kmFinal: displacement.finalKm,
-        fimDeslocamento: displacement.endOfDisplacement,
-        observacao: displacement.observation
-      })
-
       const response = await api.put(`Deslocamento/${id}/EncerrarDeslocamento`, {
         id,
-        kmFinal: displacement.finalKm,
+        kmFinal: finalKm,
         fimDeslocamento: displacement.endOfDisplacement,
         observacao: displacement.observation
       })
 
 
       if (response.status === 200) {
+        dispatch(setFinalKm(null))
         setIsSending(false)
         dispatch(clearDisplacementId())
         router.push("/client/home")
@@ -116,6 +115,8 @@ export default function Success() {
 
   useEffect(() => {
 
+    dispatch(clearDelivery())
+
     let timer: NodeJS.Timeout
 
     const startDelivery = () => {
@@ -127,8 +128,6 @@ export default function Success() {
               return {
                 ...prev,
                 endOfDisplacement: new Date().toISOString(),
-                finalKm: prev.initialKm + 100 || 100,
-                checkList: "Entregue",
               }
             })
             clearInterval(timer)
@@ -161,10 +160,15 @@ export default function Success() {
         flexDirection="column"
         justifyContent="center"
         alignItems="center"
-        height="90vh"
         width="100%"
         paddingLeft={10}
         paddingRight={10}
+        sx={{
+          height: {
+            xs: '100%',
+            md: 'calc(100vh - 64px)'
+          },
+        }}
       >
         <Typography variant="h5" align="center" color={
           isDeliveryFinished ? "green" : "text.primary"
@@ -237,7 +241,7 @@ export default function Success() {
                   <strong>Km Inicial:</strong> {displacement.initialKm}
                 </Typography>
                 <Typography variant="body1">
-                  <strong>Km Final:</strong> {displacement.finalKm}
+                  <strong>Km Final:</strong> {finalKm}
                 </Typography>
                 <Typography variant="body1">
                   <strong>Motivo:</strong> {displacement.reason}
@@ -249,11 +253,13 @@ export default function Success() {
                   <strong>Observação:</strong> {displacement.observation}
                 </Typography>
                 <Typography variant="body1">
-                  <strong>Início do Deslocamento:</strong> {displacement.startOfDisplacement}
+                  <strong>Início do Deslocamento:</strong> {
+                    format(new Date(displacement.startOfDisplacement), 'dd/MM/yyyy -  HH:mm:ss', { locale: ptBR })
+                  }
                 </Typography>
                 <Typography variant="body1">
                   <strong>Fim do Deslocamento:</strong> {
-                    new Date().toISOString()
+                    format(new Date(), 'dd/MM/yyyy -  HH:mm:ss', { locale: ptBR })
                   }
                 </Typography>
               </Grid>

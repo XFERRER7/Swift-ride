@@ -4,21 +4,41 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { IDriver } from '@/types/driver';
 import { useAppSelector } from '@/store';
 import { useDispatch } from 'react-redux';
-import { setDriverId } from '@/store/slices/delivery';
+import { setDriverId, setFinalKm, setReason } from '@/store/slices/delivery';
+import { useRouter } from 'next/router';
 
 interface IStep1Props {
   drivers: IDriver[]
 }
 
-export const Step1 = ({ drivers}: IStep1Props) => {
+export const Step1 = ({ drivers }: IStep1Props) => {
 
   const { driverId: selectedDriver } = useAppSelector(state => state.delivery)
-  
+
+  const { pathname } = useRouter()
+
   const dispatch = useDispatch()
+
+  useEffect(() => {
+
+    dispatch(setFinalKm(null))
+
+    const isDelivery = pathname.includes('delivery')
+    const isRide = pathname.includes('ride')
+
+    if (isDelivery == true) {
+      console.log('entrou no delivery', isDelivery)
+      dispatch(setReason('Delivery'))
+    }
+    else if (isRide == true) {
+      console.log('entrou no ride', isRide)
+      dispatch(setReason('Viagem'))
+    }
+  }, [])
 
   return (
     <Box sx={{
@@ -61,25 +81,25 @@ export const Step1 = ({ drivers}: IStep1Props) => {
                   </Typography>
                   <Typography variant="body2" color="textSecondary">
                     {
-                     `Categoria de habilitação:  ${driver.driverLicenseCategory}`
+                      `Categoria de habilitação:  ${driver.driverLicenseCategory}`
                     }
                   </Typography>
-                  <Button 
-                  variant="contained" 
-                  disabled={
-                    selectedDriver !== null && selectedDriver !== driver.id
-                  }
-                  color={
-                    selectedDriver === driver.id ? 'success' : 'primary'
-                  }
-                  onClick={() => {
-                    if (selectedDriver === driver.id) {
-                      dispatch(setDriverId(null))
+                  <Button
+                    variant="contained"
+                    disabled={
+                      selectedDriver !== null && selectedDriver !== driver.id
                     }
-                    else {
-                      dispatch(setDriverId(driver.id))
+                    color={
+                      selectedDriver === driver.id ? 'success' : 'primary'
                     }
-                  }}>
+                    onClick={() => {
+                      if (selectedDriver === driver.id) {
+                        dispatch(setDriverId(null))
+                      }
+                      else {
+                        dispatch(setDriverId(driver.id))
+                      }
+                    }}>
                     {
                       selectedDriver === driver.id ? 'Selecionado' : 'Selecionar'
                     }

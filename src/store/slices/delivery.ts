@@ -5,6 +5,7 @@ const deliverySlice = createSlice({
   name: "delivery",
   initialState: {
     currentKm: null,
+    finalKm: null,
     driverId: null,
     vehicleId: null,
     observations: null,
@@ -14,6 +15,9 @@ const deliverySlice = createSlice({
   reducers: {
     setCurrentKm: (state, action) => {
       state.currentKm = action.payload
+    },
+    setFinalKm: (state, action) => {
+      state.finalKm = action.payload
     },
     setDriverId: (state, action) => {
       state.driverId = action.payload
@@ -46,11 +50,12 @@ const deliverySlice = createSlice({
 export const delivery = deliverySlice.reducer
 export const  {
   setCurrentKm,
+  setFinalKm,
   setDriverId,
   setVehicleId,
   setObservations,
   setReason,
   clearDelivery,
   setDisplacementId,
-  clearDisplacementId
+  clearDisplacementId,
 } = deliverySlice.actions

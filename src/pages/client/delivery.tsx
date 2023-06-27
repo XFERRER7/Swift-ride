@@ -18,16 +18,18 @@ import TextField from '@mui/material/TextField'
 import { Step4 } from "@/components/client/steps/Step4"
 import { useDispatch } from "react-redux"
 import { useAppSelector } from "@/store"
-import { clearDelivery, setCurrentKm, setObservations, setReason } from "@/store/slices/delivery"
+import { clearDelivery, setCurrentKm, setFinalKm, setObservations, setReason } from "@/store/slices/delivery"
 import { useRouter } from "next/router"
 import { LoadButton } from "@/components/global/LoadButton"
+import { format, formatISO } from "date-fns"
+import { ptBR } from "date-fns/locale"
 
 interface IDeliveryProps {
   drivers: IDriver[]
   vehicles: IVehicle[]
 }
 
-const steps = ['Selecione um motorista', 'Selecione um veículo', 'Últimos detalhes', 'Em deslocamento']
+const steps = ['Selecione um motorista', 'Selecione um veículo', 'Últimos detalhes', 'Confirmação']
 
 export default function delivery({ drivers, vehicles }: IDeliveryProps) {
 
@@ -70,13 +72,15 @@ export default function delivery({ drivers, vehicles }: IDeliveryProps) {
 
   const handleComplete = async () => {
 
-    setIsSending(true)
-
+    const currentDateTime = new Date()
+    const formattedDateTime = format(currentDateTime, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", {
+      locale: ptBR,
+    })
     try {
 
       const response = await api.post('/Deslocamento/IniciarDeslocamento', {
         kmInicial: deliveryInfo.currentKm || 0,
-        inicioDeslocamento: new Date(),
+        inicioDeslocamento: formattedDateTime,
         checkList: 'Entregue',
         motivo: deliveryInfo.reason,
         observacao: deliveryInfo.observations || '',
@@ -89,8 +93,6 @@ export default function delivery({ drivers, vehicles }: IDeliveryProps) {
 
         setIsSending(false)
         push(`/client/success/${response.data}`)
-        dispatch(clearDelivery())
-
       }
 
     }
@@ -102,13 +104,6 @@ export default function delivery({ drivers, vehicles }: IDeliveryProps) {
     }
 
   }
-
-
-  useEffect(() => {
-
-    dispatch(setReason('Delivery'))
-
-  }, [])
 
   return (
     <ClientLayout>
@@ -243,6 +238,28 @@ export default function delivery({ drivers, vehicles }: IDeliveryProps) {
                                     }
                                   />
                                 </Grid>
+                                <Grid item xs={12} sm={12} sx={{}}>
+                                  <TextField
+                                    label="Km correspondente a endereco de entrega"
+                                    fullWidth
+                                    type="number"
+                                    value={
+                                      deliveryInfo.finalKm === null ?
+                                        0 : deliveryInfo.finalKm
+                                    }
+                                    error={
+                                      deliveryInfo.finalKm &&
+                                      deliveryInfo.finalKm < 0 ||
+                                      deliveryInfo.finalKm === undefined
+                                    }
+                                    helperText={
+                                      deliveryInfo.finalKm &&
+                                        deliveryInfo.finalKm < 0 ?
+                                        'O valor não pode ser negativo' : ''
+                                    }
+                                    onChange={(e) => dispatch(setFinalKm(e.target.value))}
+                                  />
+                                </Grid>
                               </Grid>
 
                             </Box>
@@ -310,7 +327,10 @@ export default function delivery({ drivers, vehicles }: IDeliveryProps) {
                           activeStep !== 3 ||
                           deliveryInfo.driverId === null ||
                           deliveryInfo.vehicleId === null ||
-                          deliveryInfo.currentKm === undefined
+                          deliveryInfo.currentKm === null ||
+                          deliveryInfo.finalKm === null ||
+                          deliveryInfo.currentKm < 0 ||
+                          deliveryInfo.finalKm < 0
                         }
                         onClick={handleComplete}
                       />

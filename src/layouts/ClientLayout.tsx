@@ -141,7 +141,7 @@ export const ClientLayout = ({ children }: IClientLayoutProps) => {
                 pathname === '/client/credentials' ? 'Credenciais' :
                   pathname === '/client/home' ? 'Menu' :
                     pathname === '/client/ride' ? 'Viagem' :
-                      pathname === '/client/delivery' ? 'Entrega' : 'Swift Rider'
+                      pathname === '/client/delivery' ? 'Delivery' : 'Swift Rider'
               }
             </Typography>
 
