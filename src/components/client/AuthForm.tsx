@@ -10,12 +10,13 @@ import Alert from '@mui/material/Alert'
 import Collapse from '@mui/material/Collapse'
 import IconButton from '@mui/material/IconButton'
 import CloseIcon from '@mui/icons-material/Close'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { LoadButton } from '../global/LoadButton'
 import { useDispatch } from 'react-redux'
 import { setClient } from '@/store/slices/client'
 import { useRouter } from 'next/router'
 import { useAppSelector } from '@/store'
+import { IClient } from '@/types/client'
 
 const schema = z.object({
   id: z.string().nonempty({ message: 'Campo obrigatório' })
@@ -27,6 +28,7 @@ export const AuthForm = () => {
 
   const [notFoundMessage, setNotFoundMessage] = useState('')
   const [isSending, setIsSending] = useState(false)
+  const [listClientCities, setListClientCities] = useState<string[]>([])
 
   const clientRegisteredId = useAppSelector(state => {
     return state.client.clientRegisteredId
@@ -38,6 +40,42 @@ export const AuthForm = () => {
 
   const { push } = useRouter()
   const dispatch = useDispatch()
+
+  async function getClientData() {
+
+    const clientList: IClient[] = []
+
+    try {
+      const response = await api.get(`/Cliente`)
+
+      const data = response.data
+
+
+      data.map((client: any) => {
+
+        const newClient: IClient = {
+          id: client.id,
+          documentNumber: client.numeroDocumento,
+          documentType: client.tipoDocumento,
+          name: client.nome,
+          street: client.logradouro,
+          phone: client.numero,
+          neighborhood: client.bairro,
+          city: client.cidade,
+          uf: client.uf,
+        }
+
+        clientList.push(newClient)
+      })
+
+      const clientCities = clientList.map(client => client.city)
+
+      setListClientCities(clientCities)
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   const onSubmit = async (data: TFormValues) => {
 
@@ -77,6 +115,10 @@ export const AuthForm = () => {
 
   }
 
+  useEffect(() => {
+    getClientData()
+  }, [])
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} style={{
       display: 'flex',
@@ -85,9 +127,11 @@ export const AuthForm = () => {
       width: '100%',
     }}>
 
+
       <Typography variant="body1" component="h6" fontWeight='semibold' color='GrayText'>
         - Precisamos apenas do seu id de usuário para continuar. Não compartilhe-o com ninguém.
       </Typography>
+
       {
         clientRegisteredId !== 0 &&
         <Typography variant="body1" component="h6" color='green' fontWeight='semibold'>
@@ -133,6 +177,7 @@ export const AuthForm = () => {
             {...register('id')}
             error={!!errors.id}
             helperText={errors.id?.message}
+            autoComplete='on'
           />
         </Grid>
         <Grid item xs={12}>
@@ -146,6 +191,18 @@ export const AuthForm = () => {
           />
         </Grid>
       </Grid>
+      {
+        listClientCities.length !== 0 && (
+          <Typography variant="body1" component="h6" color="black" sx={{
+            mt: 10,
+            fontSize: '0.8rem'
+          }}>
+            Estamos presentes em <span style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>{listClientCities.length}</span> {
+              listClientCities.length === 1 ? 'cidade' : 'cidades'
+            } levando nossos produtos e serviços a um público cada vez maior.
+          </Typography>
+        )
+      }
     </form>
   )
 }
