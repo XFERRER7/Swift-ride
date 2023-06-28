@@ -16,6 +16,8 @@ import SnackbarContent from '@mui/material/SnackbarContent'
 import { CreateDriverModal } from "@/components/admin/modal/CreateDriverModal"
 import { DeleteItemModal } from "@/components/admin/modal/DeleteItemModal"
 import { EditDriverModal } from "@/components/admin/modal/EditDriverModal"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
 
 export default function drivers() {
 
@@ -201,7 +203,9 @@ export default function drivers() {
                           {
                             driver.driverLicenseExpiration != '' ?
                               <Typography variant='body2'>
-                                {driver.driverLicenseExpiration}
+                                {
+                                  format(new Date(driver.driverLicenseExpiration), 'dd/MM/yyyy', { locale: ptBR })
+                                }
                               </Typography>
                               : <Typography color="GrayText" >Não informado</Typography>
                           }
@@ -312,7 +316,7 @@ export default function drivers() {
         open={createDriverModalInfo.open}
         setCreateDriverModalInfo={setCreateDriverModalInfo}
       />
-      <EditDriverModal 
+      <EditDriverModal
         open={editDriverModalInfo.open}
         setEditDriverModalInfo={setEditDriverModalInfo}
         driver={driverToEditInfo}
