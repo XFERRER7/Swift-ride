@@ -16,6 +16,9 @@ import Snackbar from '@mui/material/Snackbar'
 import SnackbarContent from '@mui/material/SnackbarContent'
 import { DeleteItemModal } from "@/components/admin/modal/DeleteItemModal";
 import { EditVehicleModal, IVehicleInfo } from "@/components/admin/modal/EditVehicleModal";
+import { useAppSelector } from "@/store";
+import { useDispatch } from "react-redux";
+import { setSearch } from "@/store/slices/search";
 
 export default function vehicles() {
 
@@ -41,6 +44,10 @@ export default function vehicles() {
     currentKm: 0,
   })
   const [idToDelete, setIdToDelete] = useState(null as null | number)
+
+  const { search } = useAppSelector(state => state.search)
+
+  const dispatch = useDispatch()
 
   async function getDataVehicles() {
 
@@ -76,7 +83,10 @@ export default function vehicles() {
   }, [createVehicleModalInfo.result, deleteItemModalInfo.result, editVehicleModalInfo.result])
 
   useEffect(() => {
+
+    dispatch(setSearch(''))
     getDataVehicles()
+    
   }, []);
 
   return (
@@ -145,7 +155,13 @@ export default function vehicles() {
                 </>
               )
                 :
-                vehicles.map((vehicle: IVehicle) => (
+                vehicles.filter((vehicle: IVehicle) => {
+                  if (search === '') {
+                    return vehicle
+                  } else if (vehicle.brandModel.toLowerCase().includes(search.toLowerCase())) {
+                    return vehicle
+                  }
+                }).map((vehicle: IVehicle) => (
                   <Grid item xs={12} sm={6} key={vehicle.id}>
                     <Card variant='outlined' sx={{ marginBottom: 2, backgroundColor: '#f5f5f5' }}>
                       <CardContent>

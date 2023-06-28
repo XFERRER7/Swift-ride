@@ -18,6 +18,9 @@ import { DeleteItemModal } from "@/components/admin/modal/DeleteItemModal"
 import { EditDriverModal } from "@/components/admin/modal/EditDriverModal"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
+import { useAppSelector } from "@/store"
+import { useDispatch } from "react-redux"
+import { setSearch } from "@/store/slices/search"
 
 export default function drivers() {
 
@@ -35,13 +38,16 @@ export default function drivers() {
     open: false,
     result: '' as 'success' | 'error' | '',
   })
-
   const [driverToEditInfo, setDriverToEditInfo] = useState({
     id: 0,
     driverLicenseCategory: '',
     driverLicenseExpiration: '',
   })
   const [idToDelete, setIdToDelete] = useState(null as null | number)
+
+  const { search } = useAppSelector(state => state.search)
+
+  const dispatch = useDispatch()
 
   async function getDataDrivers() {
 
@@ -79,7 +85,10 @@ export default function drivers() {
   }, [createDriverModalInfo.result, deleteItemModalInfo.result, editDriverModalInfo.result])
 
   useEffect(() => {
+
+    dispatch(setSearch(''))
     getDataDrivers()
+    
   }, [])
 
   return (
@@ -154,7 +163,14 @@ export default function drivers() {
                 :
 
 
-                drivers.map((driver: IDriver) => (
+                drivers.filter((driver: IDriver) => {
+                  if (search == '') {
+                    return driver
+                  } else if (driver.name.toLowerCase().includes(search.toLowerCase())) {
+                    return driver
+                  }
+                })
+                .map((driver: IDriver) => (
 
                   <Grid item xs={12} sm={6} key={driver.id}>
                     <Card variant='outlined' sx={{ marginBottom: 2, backgroundColor: '#f5f5f5' }}>

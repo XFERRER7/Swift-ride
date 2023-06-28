@@ -1,6 +1,6 @@
 import { AdminLayout } from "@/layouts/AdminLayout"
 import Box from "@mui/material/Box"
-import Typography from '@mui/material/Typography';
+import Typography from '@mui/material/Typography'
 import Button from "@mui/material/Button"
 import Card from "@mui/material/Card"
 import CardContent from "@mui/material/CardContent"
@@ -8,12 +8,14 @@ import CardActions from "@mui/material/CardActions"
 import Grid from "@mui/material/Grid"
 import { useEffect, useState } from "react"
 import { api } from "@/lib/api"
-import { DashboardSkeleton } from "@/components/admin/DashboardSkeleton";
-import { GetServerSideProps } from "next";
-import { IDisplacement } from "@/types/displacement";
-import { DeleteItemModal } from "@/components/admin/modal/DeleteItemModal";
+import { DashboardSkeleton } from "@/components/admin/DashboardSkeleton"
+import { IDisplacement } from "@/types/displacement"
+import { DeleteItemModal } from "@/components/admin/modal/DeleteItemModal"
 import Snackbar from '@mui/material/Snackbar'
 import SnackbarContent from '@mui/material/SnackbarContent'
+import { useAppSelector } from "@/store"
+import { useDispatch } from "react-redux"
+import { setSearch } from "@/store/slices/search"
 
 export default function displacements() {
 
@@ -24,6 +26,10 @@ export default function displacements() {
     result: '' as 'success' | 'error' | '',
   })
   const [idToDelete, setIdToDelete] = useState(null as null | number)
+
+  const { search } = useAppSelector(state => state.search)
+
+  const dispatch = useDispatch()
 
   async function getDataDisplacements() {
 
@@ -69,6 +75,7 @@ export default function displacements() {
 
   useEffect(() => {
 
+    dispatch(setSearch(''))
     getDataDisplacements()
 
   }, [])
@@ -133,9 +140,15 @@ export default function displacements() {
                 :
                 (
 
-                  displacements.map((displacement: IDisplacement) => (
-
-
+                  
+                  displacements.filter((displacement: IDisplacement) => {
+                    if (search === '') {
+                      return displacement
+                    } else if (displacement.reason.toLowerCase().includes(search.toLowerCase())) {
+                      return displacement
+                    }
+                  })
+                  .map((displacement: IDisplacement) => (
 
                     <Grid item xs={12} sm={12}>
                       <Card variant='outlined' sx={{ marginBottom: 2, backgroundColor: '#f5f5f5' }}>
@@ -373,39 +386,4 @@ export default function displacements() {
       />
     </AdminLayout>
   )
-}
-
-export const getServerSideProps: GetServerSideProps = async () => {
-
-  const response = await api.get("/Deslocamento")
-
-  const data = response.data
-
-  const displacements: IDisplacement[] = []
-
-  data.map((displacement: any) => {
-
-    const newDisplacement: IDisplacement = {
-      id: displacement.id,
-      initialKm: displacement.kmInicial,
-      finalKm: displacement.kmFinal,
-      startOfDisplacement: displacement.inicioDeslocamento,
-      endOfDisplacement: displacement.fimDeslocamento,
-      checkList: displacement.checkList,
-      reason: displacement.motivo,
-      observation: displacement.observacao,
-      driverId: displacement.idCondutor,
-      vehicleId: displacement.idVeiculo,
-      customerId: displacement.idCliente
-    }
-
-    displacements.push(newDisplacement)
-
-  })
-
-  return {
-    props: {
-      data: displacements
-    }
-  }
 }

@@ -23,6 +23,8 @@ import { useEffect, useState } from "react"
 import { useMediaQuery } from "@mui/material"
 import { useRouter } from "next/router"
 import { useAppSelector } from "@/store"
+import { useDispatch } from "react-redux"
+import { setSearch } from "@/store/slices/search"
 
 
 interface AdminLayoutProps {
@@ -38,11 +40,12 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
+  const { search } = useAppSelector(state => state.search)
+  const dispatch = useDispatch()
+
   useEffect(() => {
     setCurrentPath(pathname)
   }, [pathname])
-
- 
 
   const currentPageStyle = {
     container: {
@@ -254,6 +257,9 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
               >
                 <InputBase
                   sx={{ ml: 1, flex: 1 }}
+                  onChange={(e) => {
+                    dispatch(setSearch(e.target.value))
+                  }}
                   placeholder={
                     isMobile ? 'Pesquisar' : currentPath === '/admin/dashboard/vehicles' ?
                       'Pesquise por veículos' : currentPath === '/admin/dashboard/drivers' ?
