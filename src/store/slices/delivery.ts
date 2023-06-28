@@ -43,6 +43,15 @@ const deliverySlice = createSlice({
       state.vehicleId = null
       state.observations = null
       state.reason = null
+    },
+    clearAllDelivery: (state) => {
+      state.currentKm = null
+      state.driverId = null
+      state.vehicleId = null
+      state.observations = null
+      state.reason = null
+      state.finalKm = null
+      state.displacementId = null
     }
   }
 })
@@ -58,4 +67,5 @@ export const  {
   clearDelivery,
   setDisplacementId,
   clearDisplacementId,
+  clearAllDelivery
 } = deliverySlice.actions

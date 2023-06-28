@@ -13,21 +13,22 @@ import MenuItem from '@mui/material/MenuItem'
 import AccountCircle from '@mui/icons-material/AccountCircle'
 import { useDispatch } from 'react-redux'
 
-import { MouseEvent, ReactNode, useState } from 'react'
+import { MouseEvent, ReactNode, useEffect, useState } from 'react'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import { useRouter } from 'next/router'
 import { logout } from '@/store/slices/client'
 import { useAppSelector } from '@/store'
+import { clearAllDelivery } from '@/store/slices/delivery'
 
 interface IClientLayoutProps {
   children: ReactNode
 }
 
 const navLinks = [
-  { title: 'Home', path: '/client/home' },
+  { title: 'Home', path: '/' },
+  { title: 'Menu', path: '/client/home' },
   { title: 'Credenciais', path: '/client/credentials' },
-  { title: 'Viagem', path: '/client/ride' },
-  { title: 'Delivery', path: '/client/delivery' },
+  { title: 'Meu perfil', path: '/client/profile' },
 ]
 
 export const ClientLayout = ({ children }: IClientLayoutProps) => {
@@ -40,6 +41,9 @@ export const ClientLayout = ({ children }: IClientLayoutProps) => {
   const dispatch = useDispatch()
   const { pathname, push } = useRouter()
 
+  const { id } = useAppSelector(state => state.client.data)
+
+
   const handleMenu = (event: MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
   }
@@ -50,9 +54,17 @@ export const ClientLayout = ({ children }: IClientLayoutProps) => {
 
   const handleLogout = () => {
     dispatch(logout())
+    dispatch(clearAllDelivery())
     push('/client/credentials')
   }
 
+  useEffect(() => {
+
+    if (id == 0 && pathname !== '/client/credentials') {
+      push('/client/credentials')
+    }
+
+  }, [])
 
   return (
     <Box sx={{

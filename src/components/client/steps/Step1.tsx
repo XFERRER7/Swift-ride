@@ -10,12 +10,15 @@ import { useAppSelector } from '@/store';
 import { useDispatch } from 'react-redux';
 import { setDriverId, setFinalKm, setReason } from '@/store/slices/delivery';
 import { useRouter } from 'next/router';
+import { DashboardSkeleton } from '@/components/admin/DashboardSkeleton';
 
 interface IStep1Props {
   drivers: IDriver[]
 }
 
 export const Step1 = ({ drivers }: IStep1Props) => {
+
+  const [isLoading, setIsLoading] = useState(true)
 
   const { driverId: selectedDriver } = useAppSelector(state => state.delivery)
 
@@ -26,16 +29,14 @@ export const Step1 = ({ drivers }: IStep1Props) => {
   useEffect(() => {
 
     dispatch(setFinalKm(null))
-
+    setIsLoading(false)
     const isDelivery = pathname.includes('delivery')
     const isRide = pathname.includes('ride')
 
     if (isDelivery == true) {
-      console.log('entrou no delivery', isDelivery)
       dispatch(setReason('Delivery'))
     }
     else if (isRide == true) {
-      console.log('entrou no ride', isRide)
       dispatch(setReason('Viagem'))
     }
   }, [])
@@ -64,50 +65,62 @@ export const Step1 = ({ drivers }: IStep1Props) => {
       }}>
 
         {
-          drivers.map((driver, i) => (
-            <Grid item xs={12} md={6} >
-              <Card variant="elevation" sx={{
-                backgroundColor: '#f5f5f5',
-              }}>
-                <CardContent sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 2
+
+          isLoading == true ? (
+            <>
+              <Grid item xs={12} sm={6}>
+                <DashboardSkeleton />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <DashboardSkeleton />
+              </Grid>
+            </>
+          )
+            :
+            drivers.map((driver, i) => (
+              <Grid item xs={12} md={6} >
+                <Card variant="elevation" sx={{
+                  backgroundColor: '#f5f5f5',
                 }}>
-                  <Typography variant="h6" component="div">
-                    {driver.name}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    {
-                      `Categoria de habilitação:  ${driver.driverLicenseCategory}`
-                    }
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    disabled={
-                      selectedDriver !== null && selectedDriver !== driver.id
-                    }
-                    color={
-                      selectedDriver === driver.id ? 'success' : 'primary'
-                    }
-                    onClick={() => {
-                      if (selectedDriver === driver.id) {
-                        dispatch(setDriverId(null))
+                  <CardContent sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 2
+                  }}>
+                    <Typography variant="h6" component="div">
+                      {driver.name}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {
+                        `Categoria de habilitação:  ${driver.driverLicenseCategory}`
                       }
-                      else {
-                        dispatch(setDriverId(driver.id))
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      disabled={
+                        selectedDriver !== null && selectedDriver !== driver.id
                       }
-                    }}>
-                    {
-                      selectedDriver === driver.id ? 'Selecionado' : 'Selecionar'
-                    }
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))
+                      color={
+                        selectedDriver === driver.id ? 'success' : 'primary'
+                      }
+                      onClick={() => {
+                        if (selectedDriver === driver.id) {
+                          dispatch(setDriverId(null))
+                        }
+                        else {
+                          dispatch(setDriverId(driver.id))
+                        }
+                      }}>
+                      {
+                        selectedDriver === driver.id ? 'Selecionado' : 'Selecionar'
+                      }
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))
         }
 
 

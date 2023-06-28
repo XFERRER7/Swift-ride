@@ -73,6 +73,10 @@ export const Step4 = () => {
         <Paper elevation={3} sx={{
           p: 2,
           height: '70px',
+          minWidth: {
+            xs: '100%',
+            md: '300px'
+          },
           display: 'flex',
           alignItems: 'center',
           gap: 1,
@@ -86,6 +90,10 @@ export const Step4 = () => {
         <Paper elevation={3} sx={{
           p: 2,
           height: '70px',
+          minWidth: {
+            xs: '100%',
+            md: '300px'
+          },
           display: 'flex',
           alignItems: 'center',
           gap: 1,
@@ -101,6 +109,10 @@ export const Step4 = () => {
         <Paper elevation={3} sx={{
           p: 2,
           height: '70px',
+          minWidth: {
+            xs: '100%',
+            md: '300px'
+          },
           display: 'flex',
           alignItems: 'center',
           gap: 1,
@@ -118,6 +130,10 @@ export const Step4 = () => {
         <Paper elevation={3} sx={{
           p: 2,
           height: '70px',
+          minWidth: {
+            xs: '100%',
+            md: '300px'
+          },
           display: 'flex',
           alignItems: 'center',
           gap: 1,
@@ -133,6 +149,10 @@ export const Step4 = () => {
         <Paper elevation={3} sx={{
           p: 2,
           height: '70px',
+          minWidth: {
+            xs: '100%',
+            md: '300px'
+          },
           display: 'flex',
           alignItems: 'center',
           gap: 1,
@@ -148,6 +168,10 @@ export const Step4 = () => {
         <Paper elevation={3} sx={{
           p: 2,
           height: '70px',
+          minWidth: {
+            xs: '100%',
+            md: '300px'
+          },
           display: 'flex',
           alignItems: 'center',
           gap: 1,

@@ -76,6 +76,9 @@ export default function delivery({ drivers, vehicles }: IDeliveryProps) {
     const formattedDateTime = format(currentDateTime, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", {
       locale: ptBR,
     })
+
+    setIsSending(true)
+
     try {
 
       const response = await api.post('/Deslocamento/IniciarDeslocamento', {
@@ -225,7 +228,7 @@ export default function delivery({ drivers, vehicles }: IDeliveryProps) {
                                       deliveryInfo.currentKm === null ?
                                         0 : deliveryInfo.currentKm
                                     }
-                                    onChange={(e) => dispatch(setCurrentKm(Number(e.target.value)))}
+                                    onChange={(e) => dispatch(setCurrentKm(e.target.value))}
                                     error={
                                       deliveryInfo.currentKm &&
                                       deliveryInfo.currentKm < 0 ||

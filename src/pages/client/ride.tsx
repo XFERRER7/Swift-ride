@@ -21,6 +21,8 @@ import { useAppSelector } from "@/store"
 import { clearDelivery, setCurrentKm, setFinalKm, setObservations, setReason } from "@/store/slices/delivery"
 import { useRouter } from "next/router"
 import { LoadButton } from "@/components/global/LoadButton"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
 
 interface IDeliveryProps {
   drivers: IDriver[]
@@ -73,13 +75,18 @@ export default function ride({ drivers, vehicles }: IDeliveryProps) {
 
   const handleComplete = async () => {
 
+    const currentDateTime = new Date()
+    const formattedDateTime = format(currentDateTime, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", {
+      locale: ptBR,
+    })
+
     setIsSending(true)
 
     try {
 
       const response = await api.post('/Deslocamento/IniciarDeslocamento', {
         kmInicial: deliveryInfo.currentKm || 0,
-        inicioDeslocamento: new Date(),
+        inicioDeslocamento: formattedDateTime,
         checkList: 'Entregue',
         motivo: deliveryInfo.reason,
         observacao: deliveryInfo.observations || '',
@@ -92,8 +99,6 @@ export default function ride({ drivers, vehicles }: IDeliveryProps) {
 
         setIsSending(false)
         push(`/client/success/${response.data}`)
-        dispatch(clearDelivery())
-
       }
 
     }
@@ -231,7 +236,7 @@ export default function ride({ drivers, vehicles }: IDeliveryProps) {
                                       deliveryInfo.currentKm === null ?
                                         0 : deliveryInfo.currentKm
                                     }
-                                    onChange={(e) => dispatch(setCurrentKm(Number(e.target.value)))}
+                                    onChange={(e) => dispatch(setCurrentKm(e.target.value))}
                                     error={
                                       deliveryInfo.currentKm &&
                                       deliveryInfo.currentKm < 0 ||
