@@ -11,39 +11,60 @@ import ListItemText from '@mui/material/ListItemText'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import AccountCircle from '@mui/icons-material/AccountCircle'
+import { useDispatch } from 'react-redux'
 
-import { MouseEvent, ReactNode, useState } from 'react'
+import { MouseEvent, ReactNode, useEffect, useState } from 'react'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import { useRouter } from 'next/router'
+import { logout } from '@/store/slices/client'
+import { useAppSelector } from '@/store'
+import { clearAllDelivery } from '@/store/slices/delivery'
 
 interface IClientLayoutProps {
   children: ReactNode
 }
 
+const navLinks = [
+  { title: 'Home', path: '/' },
+  { title: 'Menu', path: '/client/home' },
+  { title: 'Credenciais', path: '/client/credentials' },
+  { title: 'Meu perfil', path: '/client/profile' },
+]
+
 export const ClientLayout = ({ children }: IClientLayoutProps) => {
 
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [isOpen, setIsOpen] = useState(false)
 
-  const [isOpen, setIsOpen] = useState(false);
+  const client = useAppSelector(state => state.client.data)
 
-  const router = useRouter()
+  const dispatch = useDispatch()
+  const { pathname, push } = useRouter()
 
-  const navLinks = [
-    { title: 'Home', path: '/' },
-    { title: 'Painel de Admin', path: '/about' },
-    { title: 'Services', path: '/services' },
-    { title: 'Contact', path: '/contact' },
-  ];
+  const { id } = useAppSelector(state => state.client.data)
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleMenu = (event: MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+    setAnchorEl(event.currentTarget)
+  }
 
   const handleClose = () => {
-    setAnchorEl(null);
-  };
+    setAnchorEl(null)
+  }
 
+  const handleLogout = () => {
+    dispatch(logout())
+    dispatch(clearAllDelivery())
+    push('/client/credentials')
+  }
+
+  useEffect(() => {
+
+    if (id == 0 && pathname !== '/client/credentials') {
+      push('/client/credentials')
+    }
+
+  }, [])
 
   return (
     <Box sx={{
@@ -71,7 +92,10 @@ export const ClientLayout = ({ children }: IClientLayoutProps) => {
             Swift Rider
           </Typography>
 
-          <div>
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+          }}>
             <IconButton
               size="large"
               aria-label="account of current user"
@@ -82,6 +106,11 @@ export const ClientLayout = ({ children }: IClientLayoutProps) => {
             >
               <AccountCircle />
             </IconButton>
+
+            <Typography variant="body1" fontWeight='bold' sx={{}}>
+              {client?.name}
+            </Typography>
+
             <Menu
               id="menu-appbar"
               anchorEl={anchorEl}
@@ -97,10 +126,12 @@ export const ClientLayout = ({ children }: IClientLayoutProps) => {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              <MenuItem onClick={handleClose}>Profile</MenuItem>
-              <MenuItem onClick={handleClose}>My account</MenuItem>
+              <MenuItem onClick={() => {
+                push('/client/profile')
+              }}>Meu perfil</MenuItem>
+              <MenuItem onClick={handleLogout}>Sair</MenuItem>
             </Menu>
-          </div>
+          </Box>
 
         </Toolbar>
         <Drawer anchor="left" open={isOpen}
@@ -118,7 +149,12 @@ export const ClientLayout = ({ children }: IClientLayoutProps) => {
             <Typography variant="h6" fontWeight='bold' sx={{
 
             }}>
-              Credenciais
+              {
+                pathname === '/client/credentials' ? 'Credenciais' :
+                  pathname === '/client/home' ? 'Menu' :
+                    pathname === '/client/ride' ? 'Viagem' :
+                      pathname === '/client/delivery' ? 'Delivery' : 'Swift Rider'
+              }
             </Typography>
 
             <IconButton onClick={() => setIsOpen(false)}>

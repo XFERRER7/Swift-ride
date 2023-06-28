@@ -22,6 +22,7 @@ import { useTheme } from "@mui/material/styles"
 import { useEffect, useState } from "react"
 import { useMediaQuery } from "@mui/material"
 import { useRouter } from "next/router"
+import { useAppSelector } from "@/store"
 
 
 interface AdminLayoutProps {
@@ -40,6 +41,8 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
   useEffect(() => {
     setCurrentPath(pathname)
   }, [pathname])
+
+ 
 
   const currentPageStyle = {
     container: {
@@ -209,7 +212,7 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
 
               {
                 !isMobile && (
-                  <Typography variant="h5" component="h6"  sx={{
+                  <Typography variant="h5" component="h6" sx={{
                     mr: 2,
                     fontFamily: 'monospace',
                     fontWeight: 700,
